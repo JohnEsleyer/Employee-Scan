@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1045872600901",
+    "project_id": "employee-scan",
+    "storage_bucket": "employee-scan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1045872600901:android:cce8684eaa902c36a7402c",
+        "android_client_info": {
+          "package_name": "com.example.employee_scan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1045872600901-p1jseuvhdpkucdlii5udfbq7cig9d326.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi2A3Zp_HR2RVAixd7IH1761nbqHc7Wug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1045872600901-p1jseuvhdpkucdlii5udfbq7cig9d326.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
