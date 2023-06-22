@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -57,7 +60,13 @@ class QRViewExample extends StatefulWidget {
 }
 
 class _QRViewExampleState extends State<QRViewExample> {
+  String? first_name;
+  String? last_name;
+  String? department;
+  String? scan_status;
+  String temp = " ";
   Barcode? result;
+  Color borderColor = Color.fromARGB(255, 255, 255, 255);
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
@@ -90,6 +99,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                         'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
                   else
                     const Text('Scan a code'),
+                  Text(temp),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,6 +158,9 @@ class _QRViewExampleState extends State<QRViewExample> {
                         child: ElevatedButton(
                           onPressed: () async {
                             await controller?.resumeCamera();
+                            setState(() {
+                              borderColor = Color.fromARGB(255, 255, 255, 255);
+                            });
                           },
                           child: const Text('resume',
                               style: TextStyle(fontSize: 20)),
@@ -176,7 +189,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: Color.fromARGB(255, 255, 255, 255),
+          borderColor: borderColor,
           borderRadius: 10,
           borderLength: 30,
           borderWidth: 10,
@@ -186,10 +199,69 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
     setState(() {
       this.controller = controller;
     });
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
+      await controller.pauseCamera();
+      setState(() {
+        borderColor = Color.fromARGB(255, 17, 139, 10);
+      });
+      // Check if data is JSON
+      if (isJSON(scanData.code as String)) {
+        Map<String, dynamic> data = jsonDecode(scanData.code as String);
+        setState(() {
+          temp = "Is JSON";
+        });
+        // Check if qr code belongs to the company
+        if (data['company'] == 'IbYPFwF3npZN1rfIIIe6') {
+          setState(() {
+            temp = "INfoactiv";
+          });
+
+          // Check employee existence
+          final doc = await firestore
+              .collection('Employee')
+              .doc(data['employee'])
+              .get();
+          if (doc.exists) {
+            setState(() {
+              temp = 'OK';
+            });
+
+            CollectionReference attendance = firestore.collection("Attendance");
+            attendance
+                .add({
+                  'company': data['company'],
+                  'employee': data['employee'],
+                  'time_entered': Timestamp.fromDate(DateTime.now()),
+                })
+                .then((value) => setState(() {
+                      temp = 'Attendance Recorded';
+                    }))
+                .catchError((error) {
+                  setState(() {
+                    temp = 'Failed to record attendance!';
+                  });
+                });
+          } else {
+            setState(() {
+              temp = 'Employee not found!';
+            });
+          }
+        } else {
+          setState(() {
+            temp = "Does not belong!";
+          });
+        }
+      } else {
+        setState(() {
+          temp = "Not JSON";
+          borderColor = Color.fromARGB(255, 242, 38, 38);
+        });
+      }
       setState(() {
         result = scanData;
       });
