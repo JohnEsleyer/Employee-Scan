@@ -205,7 +205,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) async {
-      await controller.pauseCamera();
+      await controller.pauseCamera(); // Pause camera
       setState(() {
         borderColor = Color.fromARGB(255, 17, 139, 10);
       });
