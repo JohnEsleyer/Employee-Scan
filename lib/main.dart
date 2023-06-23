@@ -3,20 +3,75 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:employee_scan/database/db_provider.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
+import 'database.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+
+  // Create the database file
+  String path = await getDatabasesPath();
+  String dbPath = join(path, 'local_database.db');
+
+  // Open the database
+  Database db = await openDatabase(dbPath, version: 1, onCreate: (db, version) {
+    // Create the tables in the database.
+    db.execute(
+        'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, company TEXT);');
+    db.execute(
+        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id TEXT, company_id TEXT, scanner_id TEXT, time_in TEXT, time_out TEXT, date_entered TEXT);');
+  });
+
+  // Insert data into the database
+  await db.insert('employee', {
+    'first_name': 'Ralph John',
+    'last_name': 'Policarpio',
+    'company': 'InfoActiv'
+  });
+  // await db.insert('users', {'id': 103, 'name': 'Jane Doe', 'age': 25});
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => DatabaseProvider(db),
+      child: MaterialApp(home: MyApp()),
+    ),
   );
-  runApp(const MyApp());
 }
+
+// Temporary screen
+// class MyApp2 extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Center(
+//         child: FutureBuilder(
+//           future: Provider.of<DatabaseProvider>(context).getEmployeeById(101),
+//           builder: (context, snapshot) {
+//             if (snapshot.hasData) {
+//               return Text(snapshot.data?['first_name']);
+//             } else {
+//               return Text("...");
+//             }
+//           },
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -69,7 +124,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   Color borderColor = Color.fromARGB(255, 255, 255, 255);
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
+  late DatabaseProvider db_provider;
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
@@ -83,6 +138,7 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   @override
   Widget build(BuildContext context) {
+    db_provider = Provider.of<DatabaseProvider>(context);
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -199,8 +255,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-
+    final dbHelper = DatabaseHelper();
     setState(() {
       this.controller = controller;
     });
@@ -216,36 +271,72 @@ class _QRViewExampleState extends State<QRViewExample> {
           temp = "Is JSON";
         });
         // Check if qr code belongs to the company
-        if (data['company'] == 'IbYPFwF3npZN1rfIIIe6') {
+        if (data['company'] == 111) {
           setState(() {
-            temp = "INfoactiv";
+            temp = "Infoactiv";
           });
 
           // Check employee existence
-          final doc = await firestore
-              .collection('Employee')
-              .doc(data['employee'])
-              .get();
-          if (doc.exists) {
+          bool employeeExists =
+              await db_provider.isEmployeeExists(data['employee']);
+          if (employeeExists) {
             setState(() {
               temp = 'OK';
             });
 
-            CollectionReference attendance = firestore.collection("Attendance");
-            attendance
-                .add({
-                  'company': data['company'],
-                  'employee': data['employee'],
-                  'time_entered': Timestamp.fromDate(DateTime.now()),
-                })
-                .then((value) => setState(() {
-                      temp = 'Attendance Recorded';
-                    }))
-                .catchError((error) {
-                  setState(() {
-                    temp = 'Failed to record attendance!';
-                  });
-                });
+            // CollectionReference attendance = firestore.collection("Attendance");
+            // attendance
+            //     .add({
+            //       'company': data['company'],
+            //       'employee': data['employee'],
+            //       'time_entered': Timestamp.fromDate(DateTime.now()),
+            //     })
+            //     .then((value) => setState(() {
+            //           temp = 'Attendance Recorded';
+            //         }))
+            //     .catchError((error) {
+            //       setState(() {
+            //         temp = 'Failed to record attendance!';
+            //       });
+            //     });
+
+            // Check if employee was already recorded
+            DateTime currentDate = DateTime.now();
+            String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
+            String formattedTime = DateFormat('HH:mm a').format(currentDate);
+            bool recordExists = await db_provider.isAttendanceRecordExistsDate(
+                data['employee'], formattedDate);
+            if (recordExists) {
+              Map<String, dynamic> attendanceRecord =
+                  await db_provider.getAttendanceByEmployeeIdAndCompany(
+                      data['employee'], data['company']);
+              if (attendanceRecord.isNotEmpty) {
+                // Process the retrieved attendance record
+                String timeIn = attendanceRecord['time_in'];
+                String timeOut = attendanceRecord['time_out'];
+
+                temp = 'Time In: $timeIn, Time Out: $timeOut';
+
+                if (timeOut == 'not set') {
+                  // Update timeOut
+                  await db_provider.getAttendanceByEmployeeIdAndCompany(
+                    data['employee'],
+                    data['company'],
+                  );
+                } else {
+                  temp = 'attendance was already set';
+                }
+              } else {
+                temp = 'No attendance record found ';
+              }
+            } else {
+              // Generate a v4 (random) UUID
+              var uuid = Uuid();
+              String randomUuid = uuid.v4();
+
+              await db_provider.insertAttendance(data['employee'],
+                  data['company'], 1, formattedTime, 'not set', formattedDate);
+            }
           } else {
             setState(() {
               temp = 'Employee not found!';
