@@ -94,13 +94,33 @@ class MyHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Flutter Demo Home Page')),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const QRViewExample(),
-            ));
-          },
-          child: const Text('qrView'),
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const QRViewExample(),
+                ));
+              },
+              child: const Text('qrView'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SQLiteScreen(),
+                ));
+              },
+              child: const Text('Show Employee'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SQLiteScreen2(),
+                ));
+              },
+              child: const Text('Show Attendance'),
+            ),
+          ],
         ),
       ),
     );
@@ -150,11 +170,11 @@ class _QRViewExampleState extends State<QRViewExample> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  else
-                    const Text('Scan a code'),
+                  // if (result != null)
+                  //   Text(
+                  //       'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                  // else
+                  //   const Text('Scan a code'),
                   Text(temp),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -289,7 +309,7 @@ class _QRViewExampleState extends State<QRViewExample> {
             //     .add({
             //       'company': data['company'],
             //       'employee': data['employee'],
-            //       'time_entered': Timestamp.fromDate(DateTime.now()),
+            //       'date_entered': Timestamp.fromDate(DateTime.now()),
             //     })
             //     .then((value) => setState(() {
             //           temp = 'Attendance Recorded';
@@ -336,6 +356,7 @@ class _QRViewExampleState extends State<QRViewExample> {
 
               await db_provider.insertAttendance(data['employee'],
                   data['company'], 1, formattedTime, 'not set', formattedDate);
+              temp = 'attendance recorded';
             }
           } else {
             setState(() {
@@ -372,5 +393,88 @@ class _QRViewExampleState extends State<QRViewExample> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+}
+
+// SQLite Screen
+class SQLiteScreen extends StatefulWidget {
+  @override
+  _SQLiteScreen createState() => _SQLiteScreen();
+}
+
+class _SQLiteScreen extends State<SQLiteScreen> {
+  late DatabaseProvider db_provider;
+  @override
+  Widget build(BuildContext context) {
+    db_provider = Provider.of<DatabaseProvider>(context);
+    return Scaffold(
+      body: Container(
+        child: FutureBuilder(
+          future: db_provider.getAllEmployeeRecords(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List<Map<String, dynamic>>? employeeRecords = snapshot.data;
+              return ListView.builder(
+                  itemCount: employeeRecords!.length,
+                  itemBuilder: ((context, index) {
+                    Map<String, dynamic> employeeRecord =
+                        employeeRecords[index];
+                    return ListTile(
+                      title: Text(employeeRecord['first_name'] +
+                          ' ' +
+                          employeeRecord['last_name']),
+                      subtitle: Text(employeeRecord['id'].toString()),
+                    );
+                  }));
+            } else {
+              return CircularProgressIndicator(
+                color: Colors.blue,
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class SQLiteScreen2 extends StatefulWidget {
+  @override
+  _SQLiteScreen2State createState() => _SQLiteScreen2State();
+}
+
+class _SQLiteScreen2State extends State<SQLiteScreen2> {
+  late DatabaseProvider db_provider;
+  @override
+  Widget build(BuildContext context) {
+    db_provider = Provider.of<DatabaseProvider>(context);
+    return Scaffold(
+      body: Container(
+        child: FutureBuilder(
+          future: db_provider.getAllAttendanceRecords(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List<Map<String, dynamic>>? attendanceRecords = snapshot.data;
+              return ListView.builder(
+                  itemCount: attendanceRecords!.length,
+                  itemBuilder: ((context, index) {
+                    Map<String, dynamic> attendanceRecord =
+                        attendanceRecords[index];
+                    return ListTile(
+                      title: Text('Employee: ' +
+                          attendanceRecord['employee_id'] +
+                          ' ' +
+                          'Company: ' +
+                          attendanceRecord['company_id']),
+                      subtitle: Text(attendanceRecord['id'].toString()),
+                    );
+                  }));
+            } else {
+              return CircularProgressIndicator(color: Colors.blue);
+            }
+          },
+        ),
+      ),
+    );
   }
 }

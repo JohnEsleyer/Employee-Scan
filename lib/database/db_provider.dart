@@ -17,14 +17,14 @@ class DatabaseProvider extends ChangeNotifier {
   // }
 
   Future<void> insertAttendance(int employee_id, int company_id, int scanner_id,
-      String time_in, String time_out, String time_entered) async {
+      String time_in, String time_out, String date_entered) async {
     await db.insert('attendance', {
       'employee_id': employee_id,
       'company_id': company_id,
       'scanner_id': scanner_id,
       'time_in': time_in,
       'time_out': time_out,
-      'time_entered': time_entered
+      'date_entered': date_entered
     });
   }
 
@@ -65,6 +65,25 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getAllAttendanceRecords() async {
+    final results = await db.query('attendance');
+
+    List<Map<String, dynamic>> attendanceRecords = [];
+    for (var row in results) {
+      Map<String, dynamic> attendanceRecord = {};
+      attendanceRecord['id'] = row['id'];
+      attendanceRecord['employee_id'] = row['employee_id'];
+      attendanceRecord['company_id'] = row['company_id'];
+      attendanceRecord['scanner_id'] = row['scanner_id'];
+      attendanceRecord['time_in'] = row['time_in'];
+      attendanceRecord['time_out'] = row['time_out'];
+      attendanceRecord['date_entered'] = row['date_entered'];
+      attendanceRecords.add(attendanceRecord);
+    }
+
+    return attendanceRecords;
+  }
+
   Future<bool> isAttendanceRecordExistsDate(
       int employee_id, String date_entered) async {
     final results = await db.query('attendance',
@@ -72,6 +91,22 @@ class DatabaseProvider extends ChangeNotifier {
         whereArgs: [employee_id, date_entered]);
 
     return results.isNotEmpty;
+  }
+
+  Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
+    final results = await db.query('employee');
+
+    List<Map<String, dynamic>> employeeRecords = [];
+    for (var row in results) {
+      Map<String, dynamic> employeeRecord = {};
+      employeeRecord['id'] = row['id'];
+      employeeRecord['first_name'] = row['first_name'];
+      employeeRecord['last_name'] = row['last_name'];
+      employeeRecord['company'] = row['company'];
+      employeeRecords.add(employeeRecord);
+    }
+
+    return employeeRecords;
   }
 
   Future<bool> isEmployeeExists(int employee_id) async {
