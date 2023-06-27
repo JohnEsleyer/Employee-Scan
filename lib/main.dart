@@ -2,20 +2,18 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:employee_scan/database/db_provider.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import 'database.dart';
-import 'firebase_options.dart';
+import 'navbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,27 +50,6 @@ void main() async {
   );
 }
 
-// Temporary screen
-// class MyApp2 extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Center(
-//         child: FutureBuilder(
-//           future: Provider.of<DatabaseProvider>(context).getEmployeeById(101),
-//           builder: (context, snapshot) {
-//             if (snapshot.hasData) {
-//               return Text(snapshot.data?['first_name']);
-//             } else {
-//               return Text("...");
-//             }
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -80,7 +57,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.dark(),
+      theme: ThemeData.light(),
       home: MyHome(),
     );
   }
@@ -135,16 +112,19 @@ class QRViewExample extends StatefulWidget {
 }
 
 class _QRViewExampleState extends State<QRViewExample> {
-  String? first_name;
-  String? last_name;
+  String first_name = " ";
+  String last_name = " ";
   String? department;
   String? scan_status;
+  int? id;
   String temp = " ";
   Barcode? result;
   Color borderColor = Color.fromARGB(255, 255, 255, 255);
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late DatabaseProvider db_provider;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
@@ -158,99 +138,259 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   @override
   Widget build(BuildContext context) {
+    var $ScreenWidth = MediaQuery.of(context).size.width;
+    var $ScreenHeight = MediaQuery.of(context).size.height;
+    var $generalCam = 250.0;
+    var $logoPercentage = 10;
+
     db_provider = Provider.of<DatabaseProvider>(context);
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(flex: 4, child: _buildQrView(context)),
-          Expanded(
-            flex: 1,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  // if (result != null)
-                  //   Text(
-                  //       'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  // else
-                  //   const Text('Scan a code'),
-                  Text(temp),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
-                              },
-                            )),
+        key: scaffoldKey,
+        drawer: const Navbar(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              // ignore: sized_box_for_whitespace
+              Container(
+                width: $ScreenWidth,
+                height: $ScreenHeight * ($logoPercentage / 100),
+                // color: Colors.amber,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                    ),
+                    Image.asset('assets/placeholder.jpg'),
+                    Visibility(
+                      visible:
+                          true, //TODO: Change visibility when there is connection
+                      maintainAnimation: true,
+                      maintainState: true,
+                      maintainSize: true,
+                      child: IconButton(
+                        icon: const Icon(Icons.sync),
+                        onPressed: () {
+                          print("ASDASd"); //TODO: Change to sync in database
+                        },
                       ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Text(
-                                      'Camera facing ${describeEnum(snapshot.data!)}');
-                                } else {
-                                  return const Text('loading');
-                                }
-                              },
-                            )),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.pauseCamera();
-                          },
-                          child: const Text('pause',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
-                            setState(() {
-                              borderColor = Color.fromARGB(255, 255, 255, 255);
-                            });
-                          },
-                          child: const Text('resume',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
+                    )
+                  ],
+                ),
               ),
-            ),
-          )
-        ],
-      ),
-    );
+              const SizedBox(height: 50),
+
+              // ignore: sized_box_for_whitespace
+              GestureDetector(
+                onDoubleTap: () async {
+                  await controller?.flipCamera();
+                  setState(() {});
+                },
+                onTap: () async {
+                  await controller?.pauseCamera();
+                  setState(() {});
+                },
+                child: Container(
+                  width: $generalCam,
+                  height: $generalCam,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  // color: Colors.blue,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: QRView(
+                      key: qrKey,
+                      onQRViewCreated: _onQRViewCreated,
+                      onPermissionSet: (ctrl, p) =>
+                          _onPermissionSet(context, ctrl, p),
+                      overlay: QrScannerOverlayShape(
+                        borderColor: borderColor,
+                        borderRadius: 20,
+                        borderLength: 40,
+                        borderWidth: 15,
+                        cutOutSize: $generalCam,
+                      ),
+                      // onQRViewCreated: onQRViewCreated
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 70,
+              ),
+              Expanded(
+                // ignore: sized_box_for_whitespace
+                child: Container(
+                  width: $ScreenWidth,
+                  // color: Colors.white,
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                          width: $ScreenWidth * (70 / 100),
+                          height: $ScreenHeight * (30 / 100),
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: const [
+                                BoxShadow(
+                                    color: Colors.black12,
+                                    offset: Offset(2.0, 2.0),
+                                    blurRadius: 3.0,
+                                    spreadRadius: 0.5)
+                              ]),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: $ScreenWidth,
+                                height: 30,
+                                child: const Text(
+                                  'ID Number',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const Divider(
+                                height: 2,
+                                thickness: 1,
+                                indent: 0,
+                                endIndent: 0,
+                                color: Colors.black45,
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              (temp == 'Employee not found!') ?
+                                SizedBox(
+                                width: $ScreenWidth,
+                                // height: 30,
+                                child:Column(
+                                        children: [
+                                          Text('INVALID',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 25,
+                                                fontWeight: FontWeight.bold,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                          SizedBox(height: 10),
+                                  
+                                          Text(temp,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                        ],
+                                      ) 
+                              
+                              )
+                              :
+                              SizedBox(
+                                width: $ScreenWidth,
+                                // height: 30,
+                                child: (result?.code == null)
+                                    ? const Text('No ID scanned',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          // fontWeight: FontWeight.bold
+                                        ))
+                                    : Column(
+                                        children: [
+                                          Text('$id',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 25,
+                                                fontWeight: FontWeight.bold,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                          SizedBox(height: 10),
+                                          Text('Name: $last_name, $first_name',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                          Text(temp,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                        ],
+                                      ) 
+                              
+                              ),
+                            ],
+                          )),
+                      const SizedBox(
+                        height: 30,
+                      ),
+
+                      // (result != null) ? //TODO: REPLACE CONDITION
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //   children: [
+                      //     TextButton(
+                      //       onPressed: () {
+                      //         setState(() {
+                      //           print("IN"); //TODO: REPLACE TO IN AND OUT
+                      //         });
+                      //       },
+                      //       style: TextButton.styleFrom(
+                      //         foregroundColor: Colors.white,
+                      //         backgroundColor: Colors.green[300],
+                      //         padding: const EdgeInsets.fromLTRB(40, 15, 40, 15)
+                      //       ),
+                      //     child: const Text(
+                      //       'IN',
+                      //       style: TextStyle(
+                      //         fontSize: 40
+                      //       ),
+                      //     )
+                      //     ),
+                      //     TextButton(
+                      //       onPressed: () {
+                      //         setState(() {
+                      //           print("OUT"); //TODO: REPLACE
+                      //         });
+                      //       },
+                      //       style: TextButton.styleFrom(
+                      //         foregroundColor: Colors.white,
+                      //         backgroundColor: Colors.blue[300],
+                      //         padding: const EdgeInsets.fromLTRB(25, 15, 25, 15)
+                      //       ),
+                      //       child: const Text(
+                      //         'OUT',
+                      //         style: TextStyle(
+                      //           fontSize: 40
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ) : const Text(
+                      //   "Scan an ID",
+                      //   style: TextStyle(
+                      //     fontSize: 20,
+                      //     fontWeight: FontWeight.bold
+                      //   ),
+                      //   )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ));
   }
 
   Widget _buildQrView(BuildContext context) {
@@ -275,7 +415,6 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    final dbHelper = DatabaseHelper();
     setState(() {
       this.controller = controller;
     });
@@ -304,22 +443,6 @@ class _QRViewExampleState extends State<QRViewExample> {
               temp = 'OK';
             });
 
-            // CollectionReference attendance = firestore.collection("Attendance");
-            // attendance
-            //     .add({
-            //       'company': data['company'],
-            //       'employee': data['employee'],
-            //       'date_entered': Timestamp.fromDate(DateTime.now()),
-            //     })
-            //     .then((value) => setState(() {
-            //           temp = 'Attendance Recorded';
-            //         }))
-            //     .catchError((error) {
-            //       setState(() {
-            //         temp = 'Failed to record attendance!';
-            //       });
-            //     });
-
             // Check if employee was already recorded
             DateTime currentDate = DateTime.now();
             String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
@@ -338,25 +461,49 @@ class _QRViewExampleState extends State<QRViewExample> {
                 temp = 'Time In: $timeIn, Time Out: $timeOut';
 
                 if (timeOut == 'not set') {
+                  temp = 'not set';
                   // Update timeOut
-                  await db_provider.getAttendanceByEmployeeIdAndCompany(
-                    data['employee'],
-                    data['company'],
-                  );
+                  await db_provider.updateTimeOut(
+                      data['employee'], data['company'], formattedTime);
+                  Map<String, dynamic>? employee =
+                      await db_provider.getEmployeeById(data['employee']);
+                  setState(() {
+                    temp = 'Time out recorded!';
+                    id = data['employee'];
+                    first_name = employee?['first_name'];
+                    last_name = employee?['last_name'];
+                  });
                 } else {
-                  temp = 'attendance was already set';
+                  Map<String, dynamic>? employee =
+                      await db_provider.getEmployeeById(data['employee']);
+                  setState(() {
+                    id = data['employee'];
+                    first_name = employee?['first_name'];
+                    last_name = employee?['last_name'];
+                    temp = 'Attendance was already set for today';
+                    borderColor = Colors.amber;
+                  });
+                  
                 }
               } else {
                 temp = 'No attendance record found ';
               }
             } else {
               // Generate a v4 (random) UUID
-              var uuid = Uuid();
-              String randomUuid = uuid.v4();
+              // var uuid = Uuid();
+              // String randomUuid = uuid.v4();
 
               await db_provider.insertAttendance(data['employee'],
                   data['company'], 1, formattedTime, 'not set', formattedDate);
-              temp = 'attendance recorded';
+
+              Map<String, dynamic>? employee =
+                  await db_provider.getEmployeeById(data['employee']);
+              setState(() {
+                temp = 'Time in recorded!';
+                id = data['employee'];
+                first_name = employee?['first_name'];
+                last_name = employee?['last_name'];
+              });
             }
           } else {
             setState(() {
@@ -465,8 +612,14 @@ class _SQLiteScreen2State extends State<SQLiteScreen2> {
                           attendanceRecord['employee_id'] +
                           ' ' +
                           'Company: ' +
-                          attendanceRecord['company_id']),
-                      subtitle: Text(attendanceRecord['id'].toString()),
+                          attendanceRecord['company_id'] +
+                          ' ' +
+                          'Time In:' +
+                          attendanceRecord['time_in'] +
+                          ' ' +
+                          'Time Out:' +
+                          attendanceRecord['time_out']),
+                      subtitle: Text('id:' + attendanceRecord['id'].toString()),
                     );
                   }));
             } else {

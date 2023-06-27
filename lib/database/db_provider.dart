@@ -109,6 +109,8 @@ class DatabaseProvider extends ChangeNotifier {
     return employeeRecords;
   }
 
+  
+
   Future<bool> isEmployeeExists(int employee_id) async {
     final result =
         await db.query('employee', where: 'id = ?', whereArgs: [employee_id]);
