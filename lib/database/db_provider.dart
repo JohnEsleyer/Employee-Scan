@@ -93,6 +93,16 @@ class DatabaseProvider extends ChangeNotifier {
     return results.isNotEmpty;
   }
 
+  Future<void> insertEmployee(int employee_id, String first_name, String last_name, int company ) async {
+    await db.insert('employee', {
+      'id': employee_id,
+      'first_name': first_name,
+      'last_name': last_name,
+      'company': company,
+    });
+  }
+
+
   Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
     final results = await db.query('employee');
 
