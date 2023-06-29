@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +20,10 @@ import 'package:http/http.dart' as http;
 import 'providers/db_provider.dart';
 import 'providers/internet_provider.dart';
 import 'user_defined_functions.dart';
+import 'widgets/neumorphic_button.dart';
 
-
-class HomePage extends StatefulWidget{
-
-  @override 
+class HomePage extends StatefulWidget {
+  @override
   _HomePageState createState() => _HomePageState();
 }
 
@@ -34,24 +32,28 @@ class _HomePageState extends State<HomePage> {
   late ReceivePort receivePort;
   late Isolate? isolate;
 
-  @override 
-  void initState(){
+  @override
+  void initState() {
     super.initState();
     startBackgroundTask();
   }
 
-  @override 
-  void dispose(){
+  @override
+  void dispose() {
     stopBackgroundTask();
     super.dispose();
   }
 
   Future<void> startBackgroundTask() async {
     receivePort = ReceivePort();
-    isolate = await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
+    isolate =
+        await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
     receivePort.listen((dynamic message) {
       if (message is bool) {
         internetProvider.setIsConnected(message);
+        if (message) {
+          performAction(); // Perform action when internet connection is true
+        }
       }
     });
   }
@@ -74,24 +76,92 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> performAction() async {
+    final url = 'https://example.com/api';
+    final requestBody = {'key': 'value'};
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: json.encode(requestBody),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        // Request successful
+        final responseBody = json.decode(response.body);
+        print(responseBody);
+      } else {
+        // Request failed
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Error occured during the request
+      print('Error: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     internetProvider = Provider.of<InternetProvider>(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Flutter Demo Home Page')),
+      appBar: AppBar(
+        title: const Text(
+          'Employee Scan',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        actions: [
+          internetProvider.isConnected
+                ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.wifi, color: Colors.green),
+                      Text(
+                          'Connected',
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
+                        ),
+                        
+                    ],
+                    
+                  ),
+                )
+                :  Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.wifi, color: Colors.red),
+                      Text(
+                          'Disconnected',
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+        ],
+        backgroundColor: Colors.white,
+      ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(internetProvider.isConnected ? 'Connected' : 'Disconnected'),
-            ElevatedButton(
-              onPressed: () {
+            
+            NeumorphicButton(
+              child: const Text('Scan'),
+               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => const QRViewExample(),
                 ));
               },
-              child: const Text('qrView'),
             ),
-            ElevatedButton(
+            SizedBox(height: 20),
+            NeumorphicButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => SQLiteScreen(),
@@ -99,7 +169,8 @@ class _HomePageState extends State<HomePage> {
               },
               child: const Text('Show Employee'),
             ),
-            ElevatedButton(
+            SizedBox(height: 20),
+            NeumorphicButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => SQLiteScreen2(),
@@ -278,11 +349,11 @@ class _QRViewExampleState extends State<QRViewExample> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              (temp == 'Employee not found!') ?
-                                SizedBox(
-                                width: $ScreenWidth,
-                                // height: 30,
-                                child:Column(
+                              (temp == 'Employee not found!')
+                                  ? SizedBox(
+                                      width: $ScreenWidth,
+                                      // height: 30,
+                                      child: Column(
                                         children: [
                                           Text('INVALID',
                                               textAlign: TextAlign.center,
@@ -292,7 +363,6 @@ class _QRViewExampleState extends State<QRViewExample> {
                                                 // fontWeight: FontWeight.bold
                                               )),
                                           SizedBox(height: 10),
-                                  
                                           Text(temp,
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
@@ -300,52 +370,49 @@ class _QRViewExampleState extends State<QRViewExample> {
                                                 // fontWeight: FontWeight.bold
                                               )),
                                         ],
-                                      ) 
-                              
-                              )
-                              :
-                              SizedBox(
-                                width: $ScreenWidth,
-                                // height: 30,
-                                child: (result?.code == null)
-                                    ? const Text('No ID scanned',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          // fontWeight: FontWeight.bold
-                                        ))
-                                    : Column(
-                                        children: [
-                                          Text('$id',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                          SizedBox(height: 10),
-                                          Text('$last_name, $first_name',
+                                      ))
+                                  : SizedBox(
+                                      width: $ScreenWidth,
+                                      // height: 30,
+                                      child: (result?.code == null)
+                                          ? const Text('No ID scanned',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 fontSize: 15,
                                                 // fontWeight: FontWeight.bold
-                                              )),
-                                          Text(temp,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                        ],
-                                      ) 
-                              ),
+                                              ))
+                                          : Column(
+                                              children: [
+                                                Text('$id',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 25,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      // fontWeight: FontWeight.bold
+                                                    )),
+                                                SizedBox(height: 10),
+                                                Text('$last_name, $first_name',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      // fontWeight: FontWeight.bold
+                                                    )),
+                                                Text(temp,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      // fontWeight: FontWeight.bold
+                                                    )),
+                                              ],
+                                            )),
                             ],
                           )),
                       const SizedBox(
                         height: 30,
                       ),
-
                     ],
                   ),
                 ),
@@ -445,7 +512,6 @@ class _QRViewExampleState extends State<QRViewExample> {
                     temp = 'Attendance was already set for today';
                     borderColor = Colors.amber;
                   });
-                  
                 }
               } else {
                 temp = 'No attendance record found ';

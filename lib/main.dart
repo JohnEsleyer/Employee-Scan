@@ -56,9 +56,7 @@ void main() async {
           create: (_) => DatabaseProvider(db),
         ),
       ],
-      child: MaterialApp(
-        home: EmployeeScan(),
-      ),
+      child: EmployeeScan(),
     ),
   );
 }
@@ -89,6 +87,7 @@ class _EmployeeScanState extends State<EmployeeScan> {
   Widget build(BuildContext context) {
     db_provider = Provider.of<DatabaseProvider>(context);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData.light(),
       home: FutureBuilder(
