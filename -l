@@ -1,0 +1,47 @@
+[33mcommit 1da986b739a6972e07e8fda2810f01f8c00ff1c1[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: john <john@pop-os.localdomain>
+Date:   Wed Jun 28 19:53:23 2023 +0800
+
+    automatically fetch all employees from server and store to sqlite for offline use
+
+[33mcommit 79847fea356e970f7376c64ac80069936c7d7b85[m
+Author: john <john@pop-os.localdomain>
+Date:   Tue Jun 27 11:50:00 2023 +0800
+
+    updated design of scanner
+
+[33mcommit 731a1a33be223a563fa13bb2775ead9d5111e1fd[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Fri Jun 23 16:11:09 2023 +0800
+
+    store data to sqlite when QR is scanned
+
+[33mcommit a46a8f32dab79baceef20aa0eea1d3fd4cc0a86b[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Fri Jun 23 15:18:53 2023 +0800
+
+    integrated sqlite
+
+[33mcommit 6ba286fbc9ed149d1f6a16e03f46fb53bc2cf4d9[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Thu Jun 22 13:22:51 2023 +0800
+
+    updated border color of scanner
+
+[33mcommit 2dfbfa87ae57163deef65f75609e59b36de8c6b5[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Thu Jun 22 11:10:56 2023 +0800
+
+    Attendance store to firebase when qr is scanned
+
+[33mcommit 17a1be4cc5073d27f8e8f0e0b7589d8ae2262b08[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Wed Jun 21 15:56:10 2023 +0800
+
+    added qr code scanner feature
+
+[33mcommit 3b32f1bfccae0f90561dc426fb1ab00868f2ebe5[m
+Author: john <ralphesleyer@gmail.com>
+Date:   Wed Jun 21 15:01:38 2023 +0800
+
+    integrated firebase to flutter app

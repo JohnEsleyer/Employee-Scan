@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:employee_scan/database/db_provider.dart';
-import 'package:employee_scan/user_defined_functions.dart';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,17 +18,71 @@ import 'database.dart';
 import 'navbar.dart';
 import 'package:http/http.dart' as http;
 
+import 'providers/db_provider.dart';
+import 'providers/internet_provider.dart';
+import 'user_defined_functions.dart';
 
-class MyHome extends StatelessWidget {
-  const MyHome({Key? key}) : super(key: key);
+
+class HomePage extends StatefulWidget{
+
+  @override 
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late InternetProvider internetProvider;
+  late ReceivePort receivePort;
+  late Isolate? isolate;
+
+  @override 
+  void initState(){
+    super.initState();
+    startBackgroundTask();
+  }
+
+  @override 
+  void dispose(){
+    stopBackgroundTask();
+    super.dispose();
+  }
+
+  Future<void> startBackgroundTask() async {
+    receivePort = ReceivePort();
+    isolate = await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
+    receivePort.listen((dynamic message) {
+      if (message is bool) {
+        internetProvider.setIsConnected(message);
+      }
+    });
+  }
+
+  void stopBackgroundTask() {
+    isolate?.kill(priority: Isolate.immediate);
+    isolate = null;
+    receivePort?.close();
+  }
+
+  static void checkConnectivityInIsolate(SendPort sendPort) async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final isConnected = connectivityResult != ConnectivityResult.none;
+    sendPort.send(isConnected);
+
+    // Continuously listen for connectivity changes in the isolate
+    await for (var result in Connectivity().onConnectivityChanged) {
+      final isConnected = result != ConnectivityResult.none;
+      sendPort.send(isConnected);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    internetProvider = Provider.of<InternetProvider>(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Flutter Demo Home Page')),
       body: Center(
         child: Column(
           children: [
+            Text(internetProvider.isConnected ? 'Connected' : 'Disconnected'),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(

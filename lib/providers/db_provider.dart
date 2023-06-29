@@ -24,7 +24,8 @@ class DatabaseProvider extends ChangeNotifier {
       'scanner_id': scanner_id,
       'time_in': time_in,
       'time_out': time_out,
-      'date_entered': date_entered
+      'date_entered': date_entered,
+      'sync': 0,
     });
   }
 
@@ -61,6 +62,7 @@ class DatabaseProvider extends ChangeNotifier {
       attendanceRecord['time_in'] = results[0]['time_in'];
       attendanceRecord['time_out'] = results[0]['time_out'];
       attendanceRecord['date_entered'] = results[0]['date_entered'];
+      attendanceRecord['sync'] = results[0]['sync'];
       return attendanceRecord;
     }
   }
@@ -78,6 +80,7 @@ class DatabaseProvider extends ChangeNotifier {
       attendanceRecord['time_in'] = row['time_in'];
       attendanceRecord['time_out'] = row['time_out'];
       attendanceRecord['date_entered'] = row['date_entered'];
+      attendanceRecord['sync'] = row['sync'];
       attendanceRecords.add(attendanceRecord);
     }
 

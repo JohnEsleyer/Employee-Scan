@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:employee_scan/database/db_provider.dart';
+import 'package:employee_scan/providers/db_provider.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
@@ -17,13 +19,12 @@ import 'navbar.dart';
 import 'package:http/http.dart' as http;
 
 import 'scan_screen.dart';
-
+import 'providers/internet_provider.dart';
 
 const API_URL = 'http://ojt.infoactiv.org/api';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   // Create the database file
   String path = await getDatabasesPath();
@@ -35,9 +36,8 @@ void main() async {
     db.execute(
         'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, company INTEGER);');
     db.execute(
-        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id TEXT, company_id TEXT, scanner_id TEXT, time_in TEXT, time_out TEXT, date_entered TEXT);');
+        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id TEXT, company_id TEXT, scanner_id TEXT, time_in TEXT, time_out TEXT, date_entered TEXT, sync INTEGER);');
   });
-
 
   // Insert data into the database
   // await db.insert('employee', {
@@ -47,24 +47,29 @@ void main() async {
   // });
   // await db.insert('users', {'id': 103, 'name': 'Jane Doe', 'age': 25});
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => DatabaseProvider(db),
-      child: MaterialApp(home: EmployeeScan()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => InternetProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DatabaseProvider(db),
+        ),
+      ],
+      child: MaterialApp(
+        home: EmployeeScan(),
+      ),
     ),
   );
 }
 
-
-class EmployeeScan extends StatefulWidget{
-
-  @override 
+class EmployeeScan extends StatefulWidget {
+  @override
   _EmployeeScanState createState() => _EmployeeScanState();
 }
 
 class _EmployeeScanState extends State<EmployeeScan> {
-
   late DatabaseProvider db_provider;
-
 
   Future<List<dynamic>> fetchEmployeeList() async {
     final response = await http.get(Uri.parse(API_URL + '/employee'));
@@ -88,18 +93,17 @@ class _EmployeeScanState extends State<EmployeeScan> {
       theme: ThemeData.light(),
       home: FutureBuilder(
         future: fetchEmployeeList(),
-        builder:(context, snapshot) {
-          
-          if (snapshot.hasData){
-            
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
             List<dynamic>? data = snapshot.data;
-            for (int i=0;i<data!.length;i++){
+            for (int i = 0; i < data!.length; i++) {
               // Insert data into the database
-              db_provider.insertEmployee(data[i]['id'], data[i]['first_name'], data[i]['last_name'], data[i]['company_id']);
+              db_provider.insertEmployee(data[i]['id'], data[i]['first_name'],
+                  data[i]['last_name'], data[i]['company_id']);
             }
 
-            return MyHome();
-          }else{
+            return HomePage();
+          } else {
             return Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),
