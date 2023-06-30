@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -164,17 +165,20 @@ class _HomePageState extends State<HomePage> {
         actions: [
           internetProvider.isConnected
               ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi, color: Colors.green),
-                      Text(
-                        'Connected',
-                        style: TextStyle(
-                          color: Colors.green,
+                  padding: const EdgeInsets.only(right:15, top: 8),
+                  child: FadeAnimationWidget(
+                    duration: Duration(seconds:1),
+                    child: Column(
+                      children: [
+                        Icon(Icons.sync, color: Colors.green),
+                        Text(
+                          'Syncing',
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 )
               : Padding(
