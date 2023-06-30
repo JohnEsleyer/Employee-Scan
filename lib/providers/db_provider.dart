@@ -1,5 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+
+import '../user_defined_functions.dart';
+
 
 class DatabaseProvider extends ChangeNotifier {
   final Database db;
@@ -162,4 +169,72 @@ class DatabaseProvider extends ChangeNotifier {
       return results.first;
     }
   }
+
+
+  Future<void> syncAttendance() async {
+  try {
+    // Obtain the path to the database
+    String path = await getDatabasesPath();
+    String dbPath = join(path, 'local_database.db');
+
+    // Retrieve all attendance records
+    List<Map<String, dynamic>> attendances =
+        await getAllAttendanceRecords();
+    print('Total attendance records: ${attendances.length}');
+
+    // Counter to track synced records
+    int counter = 0;
+
+    // Iterate through each attendance record
+    for (int i = 0; i < attendances.length; i++) {
+      // Check if the record is not yet synced
+      if (attendances[i]['sync'] == 0) {
+        final url = API_URL + '/attendance';
+        final requestBody = {
+          "employee_id": attendances[i]['employee_id'],
+          "company_id": attendances[i]['company_id'],
+          "scanner_id": attendances[i]['scanner_id'],
+          "time_in": attendances[i]['time_in'],
+          "time_out": attendances[i]['time_out'],
+          "date_entered": attendances[i]['date_entered'],
+        };
+
+        // Check if the record has a valid time_out value
+        if (attendances[i]['time_out'] == 'not set') {
+          print('Invalid record: ${attendances[i]}');
+        } else {
+          try {
+            // Send a POST request to the API
+            final response = await http.post(
+              Uri.parse(url),
+              body: json.encode(requestBody),
+              headers: {'Content-Type': 'application/json'},
+            );
+
+            if (response.statusCode == 200) {
+              // Request successful
+              final responseBody = json.decode(response.body);
+              print('Response body: $responseBody');
+
+              // Update the record's sync status
+              await updateSync(
+                  attendances[i]['employee_id'],
+                  attendances[i]['company_id'],
+                  1);
+            } else {
+              // Request failed
+              print('Request failed');
+            }
+          } catch (error) {
+            print('Error: $error');
+          }
+          counter++;
+        }
+      }
+    }
+    print('Total records synced: $counter');
+  } catch (error) {
+    print('Error: $error');
+  }
+}
 }

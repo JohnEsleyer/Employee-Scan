@@ -9,14 +9,12 @@ import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import 'database.dart';
 import 'navbar.dart';
-import 'package:http/http.dart' as http;
 
 import 'providers/db_provider.dart';
 import 'providers/internet_provider.dart';
@@ -79,72 +77,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> performAction() async {
-  try {
-    // Obtain the path to the database
-    String path = await getDatabasesPath();
-    String dbPath = join(path, 'local_database.db');
-
-    // Retrieve all attendance records
-    List<Map<String, dynamic>> attendances =
-        await db_provider.getAllAttendanceRecords();
-    print('Total attendance records: ${attendances.length}');
-
-    // Counter to track synced records
-    int counter = 0;
-
-    // Iterate through each attendance record
-    for (int i = 0; i < attendances.length; i++) {
-      // Check if the record is not yet synced
-      if (attendances[i]['sync'] == 0) {
-        final url = API_URL + '/attendance';
-        final requestBody = {
-          "employee_id": attendances[i]['employee_id'],
-          "company_id": attendances[i]['company_id'],
-          "scanner_id": attendances[i]['scanner_id'],
-          "time_in": attendances[i]['time_in'],
-          "time_out": attendances[i]['time_out'],
-          "date_entered": attendances[i]['date_entered'],
-        };
-
-        // Check if the record has a valid time_out value
-        if (attendances[i]['time_out'] == 'not set') {
-          print('Invalid record: ${attendances[i]}');
-        } else {
-          try {
-            // Send a POST request to the API
-            final response = await http.post(
-              Uri.parse(url),
-              body: json.encode(requestBody),
-              headers: {'Content-Type': 'application/json'},
-            );
-
-            if (response.statusCode == 200) {
-              // Request successful
-              final responseBody = json.decode(response.body);
-              print('Response body: $responseBody');
-
-              // Update the record's sync status
-              await db_provider.updateSync(
-                  attendances[i]['employee_id'],
-                  attendances[i]['company_id'],
-                  1);
-            } else {
-              // Request failed
-              print('Request failed');
-            }
-          } catch (error) {
-            print('Error: $error');
-          }
-          counter++;
-        }
-      }
-    }
-    print('Total records synced: $counter');
-  } catch (error) {
-    print('Error: $error');
-  }
-}
+  
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +85,7 @@ class _HomePageState extends State<HomePage> {
     internetProvider = Provider.of<InternetProvider>(context);
 
     if (internetProvider.isConnected == true) {
-      performAction();
+      db_provider.syncAttendance();
     }
     return Scaffold(
       appBar: AppBar(
@@ -207,7 +140,7 @@ class _HomePageState extends State<HomePage> {
               child: const Text('Scan'),
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const QRViewExample(),
+                  builder: (context) => const QRViewScreen(),
                 ));
               },
             ),
@@ -236,14 +169,14 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class QRViewExample extends StatefulWidget {
-  const QRViewExample({Key? key}) : super(key: key);
+class QRViewScreen extends StatefulWidget {
+  const QRViewScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _QRViewExampleState();
+  State<StatefulWidget> createState() => _QRViewScreenState();
 }
 
-class _QRViewExampleState extends State<QRViewExample> {
+class _QRViewScreenState extends State<QRViewScreen> {
   String first_name = " ";
   String last_name = " ";
   String? department;
@@ -267,9 +200,11 @@ class _QRViewExampleState extends State<QRViewExample> {
     }
     controller!.resumeCamera();
   }
+  
 
   @override
   Widget build(BuildContext context) {
+    var internetProvider = Provider.of<InternetProvider>(context);
     var $ScreenWidth = MediaQuery.of(context).size.width;
     var $ScreenHeight = MediaQuery.of(context).size.height;
     var $generalCam = 250.0;
@@ -295,19 +230,44 @@ class _QRViewExampleState extends State<QRViewExample> {
                       icon: const Icon(Icons.menu),
                       onPressed: () => scaffoldKey.currentState?.openDrawer(),
                     ),
-                    Image.asset('assets/placeholder.jpg'),
+                    // Image.asset('assets/placeholder.jpg'),
                     Visibility(
                       visible:
                           true, //TODO: Change visibility when there is connection
                       maintainAnimation: true,
                       maintainState: true,
                       maintainSize: true,
-                      child: IconButton(
-                        icon: const Icon(Icons.sync),
-                        onPressed: () {
-                          print("ASDASd"); //TODO: Change to sync in database
-                        },
+                      child: internetProvider.isConnected ? Padding(
+                  padding: const EdgeInsets.only(right:15, top: 8),
+                  child: FadeAnimationWidget(
+                    duration: Duration(seconds:1),
+                    child: Column(
+                      children: [
+                        Icon(Icons.sync, color: Colors.green),
+                        Text(
+                          'Syncing',
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.wifi, color: Colors.red),
+                      Text(
+                        'Disconnected',
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
                       ),
+                    ],
+                  ),
+                )
                     )
                   ],
                 ),

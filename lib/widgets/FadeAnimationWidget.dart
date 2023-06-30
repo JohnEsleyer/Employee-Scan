@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class FadeAnimationWidget extends StatefulWidget {
   final Widget child;
   final Duration duration;
