@@ -31,10 +31,13 @@ class _HomePageState extends State<HomePage> {
   late InternetProvider internetProvider;
   late ReceivePort receivePort;
   late Isolate? isolate;
+  late DatabaseProvider db_provider;
+  String debug = '';
 
   @override
   void initState() {
     super.initState();
+   
     startBackgroundTask();
   }
 
@@ -45,15 +48,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> startBackgroundTask() async {
+
     receivePort = ReceivePort();
+
     isolate =
         await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
     receivePort.listen((dynamic message) {
       if (message is bool) {
         internetProvider.setIsConnected(message);
-        if (message) {
-          performAction(); // Perform action when internet connection is true
-        }
       }
     });
   }
@@ -77,33 +79,80 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> performAction() async {
-    final url = 'https://example.com/api';
-    final requestBody = {'key': 'value'};
+  try {
+    // Obtain the path to the database
+    String path = await getDatabasesPath();
+    String dbPath = join(path, 'local_database.db');
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: json.encode(requestBody),
-        headers: {'Content-Type': 'application/json'},
-      );
+    // Retrieve all attendance records
+    List<Map<String, dynamic>> attendances =
+        await db_provider.getAllAttendanceRecords();
+    print('Total attendance records: ${attendances.length}');
 
-      if (response.statusCode == 200) {
-        // Request successful
-        final responseBody = json.decode(response.body);
-        print(responseBody);
-      } else {
-        // Request failed
-        print('Request failed with status: ${response.statusCode}');
+    // Counter to track synced records
+    int counter = 0;
+
+    // Iterate through each attendance record
+    for (int i = 0; i < attendances.length; i++) {
+      // Check if the record is not yet synced
+      if (attendances[i]['sync'] == 0) {
+        final url = API_URL + '/attendance';
+        final requestBody = {
+          "employee_id": attendances[i]['employee_id'],
+          "company_id": attendances[i]['company_id'],
+          "scanner_id": attendances[i]['scanner_id'],
+          "time_in": attendances[i]['time_in'],
+          "time_out": attendances[i]['time_out'],
+          "date_entered": attendances[i]['date_entered'],
+        };
+
+        // Check if the record has a valid time_out value
+        if (attendances[i]['time_out'] == 'not set') {
+          print('Invalid record: ${attendances[i]}');
+        } else {
+          try {
+            // Send a POST request to the API
+            final response = await http.post(
+              Uri.parse(url),
+              body: json.encode(requestBody),
+              headers: {'Content-Type': 'application/json'},
+            );
+
+            if (response.statusCode == 200) {
+              // Request successful
+              final responseBody = json.decode(response.body);
+              print('Response body: $responseBody');
+
+              // Update the record's sync status
+              await db_provider.updateSync(
+                  attendances[i]['employee_id'],
+                  attendances[i]['company_id'],
+                  1);
+            } else {
+              // Request failed
+              print('Request failed');
+            }
+          } catch (error) {
+            print('Error: $error');
+          }
+          counter++;
+        }
       }
-    } catch (error) {
-      // Error occured during the request
-      print('Error: $error');
     }
+    print('Total records synced: $counter');
+  } catch (error) {
+    print('Error: $error');
   }
+}
 
   @override
   Widget build(BuildContext context) {
+    db_provider = Provider.of<DatabaseProvider>(context);
     internetProvider = Provider.of<InternetProvider>(context);
+
+    if (internetProvider.isConnected == true) {
+      performAction();
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -114,33 +163,31 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           internetProvider.isConnected
-                ? Padding(
+              ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       Icon(Icons.wifi, color: Colors.green),
                       Text(
-                          'Connected',
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
+                        'Connected',
+                        style: TextStyle(
+                          color: Colors.green,
                         ),
-                        
+                      ),
                     ],
-                    
                   ),
                 )
-                :  Padding(
+              : Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       Icon(Icons.wifi, color: Colors.red),
                       Text(
-                          'Disconnected',
-                          style: TextStyle(
-                            color: Colors.red,
-                          ),
+                        'Disconnected',
+                        style: TextStyle(
+                          color: Colors.red,
                         ),
+                      ),
                     ],
                   ),
                 )
@@ -151,10 +198,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            
+            Text(debug),
             NeumorphicButton(
               child: const Text('Scan'),
-               onPressed: () {
+              onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => const QRViewExample(),
                 ));
@@ -637,17 +684,20 @@ class _SQLiteScreen2State extends State<SQLiteScreen2> {
                         attendanceRecords[index];
                     return ListTile(
                       title: Text('Employee: ' +
-                          attendanceRecord['employee_id'] +
+                          attendanceRecord['employee_id'].toString() +
                           ' ' +
                           'Company: ' +
-                          attendanceRecord['company_id'] +
+                          attendanceRecord['company_id'].toString() +
                           ' ' +
                           'Time In:' +
                           attendanceRecord['time_in'] +
                           ' ' +
                           'Time Out:' +
                           attendanceRecord['time_out']),
-                      subtitle: Text('id:' + attendanceRecord['id'].toString()),
+                      subtitle: Text('id:' +
+                          attendanceRecord['id'].toString() +
+                          ' Sync: ' +
+                          attendanceRecord['sync'].toString()),
                     );
                   }));
             } else {

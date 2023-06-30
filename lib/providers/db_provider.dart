@@ -38,6 +38,15 @@ class DatabaseProvider extends ChangeNotifier {
         where: 'employee_id = ? and company_id = ?', whereArgs: whereArgs);
   }
 
+  Future<void> updateSync(
+      int employee_id, int company_id, int new_sync) async {
+    final whereArgs = [employee_id, company_id];
+    final updates = {'sync': new_sync};
+
+    await db.update('attendance', updates,
+        where: 'employee_id = ? and company_id = ?', whereArgs: whereArgs);
+  }
+
   Future<bool> isAttendanceRecordExists(int employee_id, int company_id) async {
     final results = await db.query('attendance',
         where: 'employee_id = ? and company_id = ?',
@@ -107,6 +116,7 @@ class DatabaseProvider extends ChangeNotifier {
 
 
   Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
+    print('Executed getAllEmployeeRecords');
     final results = await db.query('employee');
 
     List<Map<String, dynamic>> employeeRecords = [];

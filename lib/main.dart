@@ -20,8 +20,8 @@ import 'package:http/http.dart' as http;
 
 import 'scan_screen.dart';
 import 'providers/internet_provider.dart';
+import 'user_defined_functions.dart';
 
-const API_URL = 'http://ojt.infoactiv.org/api';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +36,7 @@ void main() async {
     db.execute(
         'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, company INTEGER);');
     db.execute(
-        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id TEXT, company_id TEXT, scanner_id TEXT, time_in TEXT, time_out TEXT, date_entered TEXT, sync INTEGER);');
+        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, company_id INTEGER, scanner_id INTEGER, time_in TEXT, time_out TEXT, date_entered TEXT, sync INTEGER);');
   });
 
   // Insert data into the database
@@ -96,9 +96,14 @@ class _EmployeeScanState extends State<EmployeeScan> {
           if (snapshot.hasData) {
             List<dynamic>? data = snapshot.data;
             for (int i = 0; i < data!.length; i++) {
+
+              try {              
               // Insert data into the database
               db_provider.insertEmployee(data[i]['id'], data[i]['first_name'],
                   data[i]['last_name'], data[i]['company_id']);
+              }catch(error){
+                print('Error: Error at inserting employee ($error)');
+              }
             }
 
             return HomePage();

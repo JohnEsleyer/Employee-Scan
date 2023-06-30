@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+
+// Constants
+const API_URL = 'http://ojt.infoactiv.org/api';
+
 // Identify is string is JSON
 bool isJSON(String? string) {
   try {
