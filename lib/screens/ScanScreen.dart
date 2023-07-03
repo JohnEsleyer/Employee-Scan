@@ -5,21 +5,21 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
+import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
-import 'database.dart';
-import 'navbar.dart';
 
-import 'providers/db_provider.dart';
-import 'providers/internet_provider.dart';
-import 'user_defined_functions.dart';
-import 'widgets/neumorphic_button.dart';
+import '../navbar.dart';
+
+import '../providers/DBProvider.dart';
+import '../providers/InternetProvider.dart';
+import '../user_defined_functions.dart';
+import '../widgets/neumorphic_button.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -148,19 +148,19 @@ class _HomePageState extends State<HomePage> {
             NeumorphicButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SQLiteScreen(),
+                  builder: (context) => ShowEmployeeScreen(),
                 ));
               },
-              child: const Text('Show Employee'),
+              child: const Text('Employees List'),
             ),
             SizedBox(height: 20),
             NeumorphicButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SQLiteScreen2(),
+                  builder: (context) => ShowAttendanceScreen(),
                 ));
               },
-              child: const Text('Show Attendance'),
+              child: const Text('Show Attendance List'),
             ),
           ],
         ),
@@ -582,94 +582,3 @@ class _QRViewScreenState extends State<QRViewScreen> {
   }
 }
 
-// SQLite Screen
-class SQLiteScreen extends StatefulWidget {
-  @override
-  _SQLiteScreen createState() => _SQLiteScreen();
-}
-
-class _SQLiteScreen extends State<SQLiteScreen> {
-  late DatabaseProvider db_provider;
-  @override
-  Widget build(BuildContext context) {
-    db_provider = Provider.of<DatabaseProvider>(context);
-    return Scaffold(
-      body: Container(
-        child: FutureBuilder(
-          future: db_provider.getAllEmployeeRecords(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              List<Map<String, dynamic>>? employeeRecords = snapshot.data;
-              return ListView.builder(
-                  itemCount: employeeRecords!.length,
-                  itemBuilder: ((context, index) {
-                    Map<String, dynamic> employeeRecord =
-                        employeeRecords[index];
-                    return ListTile(
-                      title: Text(employeeRecord['first_name'] +
-                          ' ' +
-                          employeeRecord['last_name']),
-                      subtitle: Text(employeeRecord['id'].toString()),
-                    );
-                  }));
-            } else {
-              return CircularProgressIndicator(
-                color: Colors.blue,
-              );
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class SQLiteScreen2 extends StatefulWidget {
-  @override
-  _SQLiteScreen2State createState() => _SQLiteScreen2State();
-}
-
-class _SQLiteScreen2State extends State<SQLiteScreen2> {
-  late DatabaseProvider db_provider;
-  @override
-  Widget build(BuildContext context) {
-    db_provider = Provider.of<DatabaseProvider>(context);
-    return Scaffold(
-      body: Container(
-        child: FutureBuilder(
-          future: db_provider.getAllAttendanceRecords(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              List<Map<String, dynamic>>? attendanceRecords = snapshot.data;
-              return ListView.builder(
-                  itemCount: attendanceRecords!.length,
-                  itemBuilder: ((context, index) {
-                    Map<String, dynamic> attendanceRecord =
-                        attendanceRecords[index];
-                    return ListTile(
-                      title: Text('Employee: ' +
-                          attendanceRecord['employee_id'].toString() +
-                          ' ' +
-                          'Company: ' +
-                          attendanceRecord['company_id'].toString() +
-                          ' ' +
-                          'Time In:' +
-                          attendanceRecord['time_in'] +
-                          ' ' +
-                          'Time Out:' +
-                          attendanceRecord['time_out']),
-                      subtitle: Text('id:' +
-                          attendanceRecord['id'].toString() +
-                          ' Sync: ' +
-                          attendanceRecord['sync'].toString()),
-                    );
-                  }));
-            } else {
-              return CircularProgressIndicator(color: Colors.blue);
-            }
-          },
-        ),
-      ),
-    );
-  }
-}

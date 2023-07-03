@@ -13,16 +13,6 @@ class DatabaseProvider extends ChangeNotifier {
 
   DatabaseProvider(this.db);
 
-  // Future<void> createTable() async {
-  //   await db.execute(
-  //       'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)');
-  // }
-
-  // Future<void> insertData() async {
-  //   await db.insert('users', {'name': 'John Doe', 'age': 30});
-  //   await db.insert('users', {'name': 'Jane Doe', 'age': 25});
-  // }
-
   Future<void> insertAttendance(int employee_id, int company_id, int scanner_id,
       String time_in, String time_out, String date_entered) async {
     await db.insert('attendance', {

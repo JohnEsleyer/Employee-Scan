@@ -3,25 +3,17 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:employee_scan/providers/db_provider.dart';
+import 'package:employee_scan/providers/DBProvider.dart';
 import 'package:employee_scan/user_defined_functions.dart';
-import 'package:flutter/foundation.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
-import 'database.dart';
-import 'navbar.dart';
 import 'package:http/http.dart' as http;
 
-import 'scan_screen.dart';
-import 'providers/internet_provider.dart';
+import 'screens/ScanScreen.dart';
+import 'providers/InternetProvider.dart';
 import 'user_defined_functions.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +75,8 @@ class _EmployeeScanState extends State<EmployeeScan> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     db_provider = Provider.of<DatabaseProvider>(context);
@@ -96,12 +90,12 @@ class _EmployeeScanState extends State<EmployeeScan> {
           if (snapshot.hasData) {
             List<dynamic>? data = snapshot.data;
             for (int i = 0; i < data!.length; i++) {
-
-              try {              
-              // Insert data into the database
-              db_provider.insertEmployee(data[i]['id'], data[i]['first_name'],
-                  data[i]['last_name'], data[i]['company_id']);
-              }catch(error){
+              try {
+          
+                // Insert data into the database
+                db_provider.insertEmployee(data[i]['id'], data[i]['first_name'],
+                    data[i]['last_name'], data[i]['company_id']);
+              } catch (error) {
                 print('Error: Error at inserting employee ($error)');
               }
             }
