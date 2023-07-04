@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
     internetProvider = Provider.of<InternetProvider>(context);
 
     if (internetProvider.isConnected == true) {
-      db_provider.syncAttendance();
+      db_provider.syncAttendance(context);
     }
     return Scaffold(
       appBar: AppBar(

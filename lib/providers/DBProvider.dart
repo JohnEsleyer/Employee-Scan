@@ -1,4 +1,7 @@
+import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
@@ -161,7 +164,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
 
-  Future<void> syncAttendance() async {
+  Future<void> syncAttendance(BuildContext context) async {
   try {
     // Obtain the path to the database
     String path = await getDatabasesPath();
@@ -194,11 +197,18 @@ class DatabaseProvider extends ChangeNotifier {
           print('Invalid record: ${attendances[i]}');
         } else {
           try {
+            String token = Provider.of<UserDataProvider>(context).getToken;
+
+            Map<String, String> headers = {
+              "Authorization": "Bearer $token",
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            };
             // Send a POST request to the API
             final response = await http.post(
               Uri.parse(url),
               body: json.encode(requestBody),
-              headers: {'Content-Type': 'application/json'},
+              headers: headers,
             );
 
             if (response.statusCode == 200) {

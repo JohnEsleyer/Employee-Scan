@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:employee_scan/providers/DBProvider.dart';
+import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -47,6 +48,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => DatabaseProvider(db),
         ),
+        ChangeNotifierProvider(
+          create: (_) => UserDataProvider(),
+        ),
       ],
       child: MaterialApp(
         theme: ThemeData.light(),
@@ -74,13 +78,13 @@ class _LoginState extends State<Login> {
   bool isSuccess = true;
   bool isWaiting = false;
 
-  Future<bool> login() async {
+  Future<bool> login(BuildContext context) async {
     // Get the username and password from the text fields
     String username = _usernameController.text;
     String password = _passwordController.text;
 
     // Create the request URL
-    Uri url = Uri.parse("https://ojt.infoactiv.org/api/login");
+    Uri url = Uri.parse("$API_URL/login");
 
     // Create the headers
     Map<String, String> headers = {
@@ -90,7 +94,7 @@ class _LoginState extends State<Login> {
 
     // Create the body of the request
     Map<String, String> body = {
-      "email": username,
+      "username": username,
       "password": password,
     };
 
@@ -102,7 +106,11 @@ class _LoginState extends State<Login> {
     if (response.statusCode == 200) {
       // The request was successful, parse the body
       String body = response.body;
-      var user = jsonDecode(body);
+      var result = jsonDecode(body);
+
+      Provider.of<UserDataProvider>(context, listen: false)
+          .setToken(result['token']);
+
       return true;
     } else {
       // The request failed, print the error
@@ -190,50 +198,24 @@ class _LoginState extends State<Login> {
                 const SizedBox(
                   height: 15,
                 ),
-                const Text(
-                  'Errors', //TODO: Replace for errors
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+
                 const SizedBox(
                   height: 15,
                 ),
                 if (isSuccess == true)
                   SizedBox(
                     width: $ScreenWidth * (50 / 100),
-                    child: 
-                    !isWaiting ?
-                    ElevatedButton(
-                        onPressed: () async {
-                          bool result = await login();
-
-                          if (result) {
-                            Navigator.popAndPushNamed(context, '/home');
-                          } else {
-                            setState(() {
-                              isSuccess = false;
-                            });
-                          }
-                        },
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(fontSize: 18),
-                        )) :
-                      CircularProgressIndicator(color: Colors.blue,),
-
-                  )
-                else if (isSuccess == false)
-                  SizedBox(
-                    width: $ScreenWidth * (50 / 100),
-                    child: Column(
-                      children: [
-                        ElevatedButton(
+                    child: !isWaiting
+                        ? ElevatedButton(
                             onPressed: () async {
-                              bool result = await login();
-
+                              setState(() {
+                                isWaiting = true;
+                              });
+                              bool result = await login(context);
+                              
+                              setState(() {
+                                isWaiting = false;
+                              });
                               if (result) {
                                 Navigator.popAndPushNamed(context, '/home');
                               } else {
@@ -245,13 +227,53 @@ class _LoginState extends State<Login> {
                             child: const Text(
                               'Login',
                               style: TextStyle(fontSize: 18),
-                            )),
+                            ))
+                        : Center(
+                          child: CircularProgressIndicator(
+                              color: Colors.blue,
+                            ),
+                        ),
+                  )
+                else if (isSuccess == false)
+                  SizedBox(
+                    width: $ScreenWidth * (50 / 100),
+                    child: Column(
+                      children: [
                         Text(
                           'Login Failed',
                           style: TextStyle(
                             color: Colors.red,
                           ),
                         ),
+                        !isWaiting
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              setState(() {
+                                isWaiting = true;
+                              });
+                              bool result = await login(context);
+                              
+                              setState(() {
+                                isWaiting = false;
+                              });
+                              if (result) {
+                                Navigator.popAndPushNamed(context, '/home');
+                              } else {
+                                setState(() {
+                                  isSuccess = false;
+                                });
+                              }
+                            },
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(fontSize: 18),
+                            ))
+                        : Center(
+                          child: CircularProgressIndicator(
+                              color: Colors.blue,
+                            ),
+                        ),
+                        
                       ],
                     ),
                   )
@@ -271,9 +293,19 @@ class EmployeeScan extends StatefulWidget {
 
 class _EmployeeScanState extends State<EmployeeScan> {
   late DatabaseProvider db_provider;
+  String token = '';
 
   Future<List<dynamic>> fetchEmployeeList() async {
-    final response = await http.get(Uri.parse(API_URL + '/employee'));
+    Map<String, String> headers = {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    };
+
+    final response = await http.get(
+      Uri.parse(API_URL + '/employee'),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       print("200");
@@ -288,6 +320,8 @@ class _EmployeeScanState extends State<EmployeeScan> {
 
   @override
   Widget build(BuildContext context) {
+    token = Provider.of<UserDataProvider>(context).getToken;
+
     db_provider = Provider.of<DatabaseProvider>(context);
     return Container(
       child: FutureBuilder(
