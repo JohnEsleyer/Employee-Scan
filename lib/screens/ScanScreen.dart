@@ -33,6 +33,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
   int? id;
   String temp = " ";
   Barcode? result;
+  bool notJSON = false;
   Color borderColor = Color.fromARGB(255, 255, 255, 255);
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -155,7 +156,9 @@ class _QRViewScreenState extends State<QRViewScreen> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              (temp == 'Employee not found!')
+                              (!notJSON) ? 
+                              Container(
+                                child:(temp == 'Employee not found!')
                                   ? SizedBox(
                                       width: $ScreenWidth,
                                       // height: 30,
@@ -214,6 +217,30 @@ class _QRViewScreenState extends State<QRViewScreen> {
                                                     )),
                                               ],
                                             )),
+                              ) : Container(
+                                child: SizedBox(
+                                      width: $ScreenWidth,
+                                      // height: 30,
+                                      child: Column(
+                                        children: [
+                                          Text('INVALID',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 25,
+                                                fontWeight: FontWeight.bold,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                          SizedBox(height: 10),
+                                          Text(temp,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                // fontWeight: FontWeight.bold
+                                              )),
+                                        ],
+                                      )),
+                              ),
+                              
                             ],
                           )),
                       const SizedBox(
@@ -351,7 +378,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
         }
       } else {
         setState(() {
-          temp = "Not JSON";
+          notJSON = true;
           borderColor = Color.fromARGB(255, 242, 38, 38);
         });
       }
