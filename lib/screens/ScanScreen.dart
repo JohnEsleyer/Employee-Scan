@@ -8,7 +8,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
 import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +61,7 @@ class _HomePageState extends State<HomePage> {
   void stopBackgroundTask() {
     isolate?.kill(priority: Isolate.immediate);
     isolate = null;
-    receivePort?.close();
+    receivePort.close();
   }
 
   static void checkConnectivityInIsolate(SendPort sendPort) async {

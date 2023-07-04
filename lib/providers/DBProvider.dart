@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
@@ -166,10 +165,6 @@ class DatabaseProvider extends ChangeNotifier {
 
   Future<void> syncAttendance(BuildContext context) async {
   try {
-    // Obtain the path to the database
-    String path = await getDatabasesPath();
-    String dbPath = join(path, 'local_database.db');
-
     // Retrieve all attendance records
     List<Map<String, dynamic>> attendances =
         await getAllAttendanceRecords();
@@ -197,7 +192,7 @@ class DatabaseProvider extends ChangeNotifier {
           print('Invalid record: ${attendances[i]}');
         } else {
           try {
-            String token = Provider.of<UserDataProvider>(context).getToken;
+            String token = Provider.of<UserDataProvider>(context, listen: false).getToken;
 
             Map<String, String> headers = {
               "Authorization": "Bearer $token",

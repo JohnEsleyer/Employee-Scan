@@ -1,6 +1,6 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
+
 
 class InternetProvider with ChangeNotifier {
   bool _isConnected = false;
