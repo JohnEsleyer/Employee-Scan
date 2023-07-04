@@ -12,7 +12,7 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
   late DatabaseProvider db_provider;
   late List<Map<String, dynamic>> allEmployees = [];
 
-  Future<List<Map<String, dynamic>>> getAllAttendanceRecordAndEmployee() async{
+  Future<List<Map<String, dynamic>>> getAllAttendanceRecordAndEmployee() async {
     var attendances = await db_provider.getAllAttendanceRecords();
     var employees = await db_provider.getAllEmployeeRecords();
     setState(() {
@@ -32,79 +32,110 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               List<Map<String, dynamic>>? attendanceRecords = snapshot.data;
-              
-              if (attendanceRecords!.length != 0){
+
+              if (attendanceRecords!.length != 0) {
                 return ListView.builder(
-                  itemCount: attendanceRecords!.length,
-                  itemBuilder: ((context, index) {
-                    Map<String, dynamic> attendanceRecord =
-                        attendanceRecords[index];
-                     return Row(
-                      children: [
-                        Icon(Icons.person,size: 50,),
-                        Padding(
+                    itemCount: attendanceRecords.length,
+                    itemBuilder: ((context, index) {
+                      Map<String, dynamic> attendanceRecord =
+                          attendanceRecords[index];
+                      return Container(
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            offset: Offset(2.0, 2.0),
+                            blurRadius: 3.0,
+                            blurStyle: BlurStyle.outer,
+                            spreadRadius: 0.5,
+                          ),
+                        ]),
+                        child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    "Employee ID: ",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                          child: Row(
+                            children: [
+                              
+                              (attendanceRecord['sync'] == 1)
+                                  ? Column(
+                                    children: [
+                                      Icon(
+                                          Icons.check_circle_sharp,
+                                          size: 50,
+                                          color: Colors.green,
+                                        ),
+                                      Text('Synced', style: TextStyle(color: Colors.green)),
+                                    ],
+                                  )
+                                  : Icon(
+                                      Icons.radio_button_checked_outlined,
+                                      size: 50,
+                                      
                                     ),
-                                  ),
-                                  Text(attendanceRecord['employee_id']
-                                      .toString()),
-                                ],
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Employee ID: ",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(attendanceRecord['employee_id']
+                                                .toString()),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Name: ",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                                '${allEmployees[index]['last_name']}, ${allEmployees[index]['first_name']}'),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Time In: ",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(attendanceRecord['time_in']),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Time Out: ",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(attendanceRecord['time_out']),
+                                          ],
+                                        )
+                                      ]),
+                                ),
                               ),
-                               Row(
-                                children: [
-                                  Text(
-                                    "Name: ",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text('${allEmployees[index]['first_name']}, ${allEmployees[index]['last_name']}'),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Time In: ",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(attendanceRecord['time_in']),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Time Out: ",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(attendanceRecord['time_out']),
-                                ],
-                              )
-                            ]),
+                            ],
                           ),
                         ),
-                      ],
-                    );
-                    
-                  }));
-              }else{
-                return Center(child: Text("No Attendance Yet"),);
+                      );
+                    }));
+              } else {
+                return Center(
+                  child: Text("No Attendance Yet"),
+                );
               }
-              
-              
             } else {
               return CircularProgressIndicator(color: Colors.blue);
             }

@@ -3,10 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/DBProvider.dart';
 
-
-
 class ShowEmployeeScreen extends StatefulWidget {
-
   @override
   _ShowEmployeeScreen createState() => _ShowEmployeeScreen();
 }
@@ -28,11 +25,73 @@ class _ShowEmployeeScreen extends State<ShowEmployeeScreen> {
                   itemBuilder: ((context, index) {
                     Map<String, dynamic> employeeRecord =
                         employeeRecords[index];
-                    return ListTile(
-                      title: Text(employeeRecord['first_name'] +
-                          ' ' +
-                          employeeRecord['last_name']),
-                      subtitle: Text('ID: ${employeeRecord['id']}'),
+                    return Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  offset: Offset(2.0, 2.0),
+                                  blurRadius: 3.0,
+                                  blurStyle: BlurStyle.outer,
+                                  spreadRadius: 0.5,
+                                ),
+                              ]),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.person,
+                                    size: 50,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  "Employee ID: ",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(employeeRecord['id']
+                                                    .toString()),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  "Name: ",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                    '${employeeRecord['last_name']}, ${employeeRecord['first_name']}'),
+                                              ],
+                                            ),
+                                            SizedBox(height: 15),
+                                          ]),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                      ],
                     );
                   }));
             } else {

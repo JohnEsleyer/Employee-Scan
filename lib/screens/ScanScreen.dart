@@ -209,7 +209,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
     var $ScreenWidth = MediaQuery.of(context).size.width;
     var $ScreenHeight = MediaQuery.of(context).size.height;
     var $generalCam = 250.0;
-    var $logoPercentage = 10;
+    // var $logoPercentage = 10;
 
 
 
