@@ -1,12 +1,8 @@
-import 'dart:async';
+
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:connectivity/connectivity.dart';
-import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
-import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -18,155 +14,9 @@ import '../navbar.dart';
 import '../providers/DBProvider.dart';
 import '../providers/InternetProvider.dart';
 import '../user_defined_functions.dart';
-import '../widgets/neumorphic_button.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
 
-class _HomePageState extends State<HomePage> {
-  late InternetProvider internetProvider;
-  late ReceivePort receivePort;
-  late Isolate? isolate;
-  late DatabaseProvider db_provider;
-  String debug = '';
 
-  @override
-  void initState() {
-    super.initState();
-   
-    startBackgroundTask();
-  }
-
-  @override
-  void dispose() {
-    stopBackgroundTask();
-    super.dispose();
-  }
-
-  Future<void> startBackgroundTask() async {
-
-    receivePort = ReceivePort();
-
-    isolate =
-        await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
-    receivePort.listen((dynamic message) {
-      if (message is bool) {
-        internetProvider.setIsConnected(message);
-      }
-    });
-  }
-
-  void stopBackgroundTask() {
-    isolate?.kill(priority: Isolate.immediate);
-    isolate = null;
-    receivePort.close();
-  }
-
-  static void checkConnectivityInIsolate(SendPort sendPort) async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    final isConnected = connectivityResult != ConnectivityResult.none;
-    sendPort.send(isConnected);
-
-    // Continuously listen for connectivity changes in the isolate
-    await for (var result in Connectivity().onConnectivityChanged) {
-      final isConnected = result != ConnectivityResult.none;
-      sendPort.send(isConnected);
-    }
-  }
-
-  
-
-  @override
-  Widget build(BuildContext context) {
-    db_provider = Provider.of<DatabaseProvider>(context);
-    internetProvider = Provider.of<InternetProvider>(context);
-
-    if (internetProvider.isConnected == true) {
-      db_provider.syncAttendance(context);
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Employee Scan',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-        actions: [
-          internetProvider.isConnected
-              ? Padding(
-                  padding: const EdgeInsets.only(right:15, top: 8),
-                  child: FadeAnimationWidget(
-                    duration: Duration(seconds:1),
-                    child: Column(
-                      children: [
-                        Icon(Icons.sync, color: Colors.green),
-                        Text(
-                          'Syncing',
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi, color: Colors.red),
-                      Text(
-                        'Disconnected',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-        ],
-        backgroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(debug),
-            NeumorphicButton(
-              child: const Text('Scan'),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const QRViewScreen(),
-                ));
-              },
-            ),
-            SizedBox(height: 20),
-            NeumorphicButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ShowEmployeeScreen(),
-                ));
-              },
-              child: const Text('Employees List'),
-            ),
-            SizedBox(height: 20),
-            NeumorphicButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ShowAttendanceScreen(),
-                ));
-              },
-              child: const Text('Show Attendance List'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class QRViewScreen extends StatefulWidget {
   const QRViewScreen({Key? key}) : super(key: key);
@@ -216,62 +66,8 @@ class _QRViewScreenState extends State<QRViewScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              // ignore: sized_box_for_whitespace
-              Container(
-                width: $ScreenWidth,
-                height: $ScreenHeight * ($logoPercentage / 100),
-                // color: Colors.amber,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                    ),
-                    // Image.asset('assets/placeholder.jpg'),
-                    Visibility(
-                      visible:
-                          true, //TODO: Change visibility when there is connection
-                      maintainAnimation: true,
-                      maintainState: true,
-                      maintainSize: true,
-                      child: internetProvider.isConnected ? Padding(
-                  padding: const EdgeInsets.only(right:15, top: 8),
-                  child: FadeAnimationWidget(
-                    duration: Duration(seconds:1),
-                    child: Column(
-                      children: [
-                        Icon(Icons.sync, color: Colors.green),
-                        Text(
-                          'Syncing',
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi, color: Colors.red),
-                      Text(
-                        'Disconnected',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
+ 
 
               // ignore: sized_box_for_whitespace
               GestureDetector(

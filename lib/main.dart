@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
 
+import 'screens/HomePage.dart';
 import 'screens/ScanScreen.dart';
 import 'providers/InternetProvider.dart';
 import 'user_defined_functions.dart';
