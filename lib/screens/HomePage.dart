@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:employee_scan/navbar.dart';
 import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
 import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/widgets/CountdownTimerSync.dart';
@@ -100,7 +101,12 @@ class _HomePageState extends State<HomePage> {
     if (internetProvider.isConnected == true) {
       db_provider.syncAttendance(context);
     }
+
+    final GlobalKey<ScaffoldState> _key = GlobalKey(); 
+
     return Scaffold(
+      key: _key,
+      drawer: Navbar(),
       bottomNavigationBar: BottomNavigationBar(
         items: _bottomNavigationBarItems,
         currentIndex: _selectedIndex,
@@ -111,6 +117,13 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       appBar: AppBar(
+        
+        leading: GestureDetector(
+          onTap: (){
+           _key.currentState!.openDrawer();
+          },
+          child: Icon(Icons.menu, color: Colors.black,),
+        ),
         title: const Text(
           'Employee Scan',
           style: TextStyle(

@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-import 'dart:isolate';
 
 import 'package:employee_scan/providers/DBProvider.dart';
 import 'package:employee_scan/providers/UserDataProvider.dart';
@@ -13,9 +10,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
 
 import 'screens/HomePage.dart';
-import 'screens/ScanScreen.dart';
+
 import 'providers/InternetProvider.dart';
-import 'user_defined_functions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,13 +29,7 @@ void main() async {
         'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, company_id INTEGER, scanner_id INTEGER, time_in TEXT, time_out TEXT, date_entered TEXT, sync INTEGER);');
   });
 
-  // Insert data into the database
-  // await db.insert('employee', {
-  //   'first_name': 'Ralph John',
-  //   'last_name': 'Policarpio',
-  //   'company': 1
-  // });
-  // await db.insert('users', {'id': 103, 'name': 'Jane Doe', 'age': 25});
+  
   runApp(
     MultiProvider(
       providers: [
@@ -57,7 +47,7 @@ void main() async {
         theme: ThemeData.light(),
         debugShowCheckedModeBanner: false,
         routes: {
-          '/': (_) => Login(),
+          '/': (_) => const Login(),
           '/home': (_) => EmployeeScan(),
         },
       ),

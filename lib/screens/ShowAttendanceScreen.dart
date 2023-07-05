@@ -26,6 +26,16 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
   Widget build(BuildContext context) {
     db_provider = Provider.of<DatabaseProvider>(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.white,
+        title: Text(
+          "Local database",
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: Container(
         child: FutureBuilder(
           future: getAllAttendanceRecordAndEmployee(),
@@ -53,22 +63,22 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
                             children: [
-                              
                               (attendanceRecord['sync'] == 1)
                                   ? Column(
-                                    children: [
-                                      Icon(
+                                      children: [
+                                        Icon(
                                           Icons.check_circle_sharp,
                                           size: 50,
                                           color: Colors.green,
                                         ),
-                                      Text('Synced', style: TextStyle(color: Colors.green)),
-                                    ],
-                                  )
+                                        Text('Synced',
+                                            style:
+                                                TextStyle(color: Colors.green)),
+                                      ],
+                                    )
                                   : Icon(
                                       Icons.radio_button_off,
                                       size: 50,
-                                      
                                     ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),

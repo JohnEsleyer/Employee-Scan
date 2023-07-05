@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'providers/UserDataProvider.dart';
 
 class Navbar extends StatefulWidget {
   const Navbar({ Key? key }) : super(key: key);
@@ -8,8 +11,12 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
+
+  late UserDataProvider userDataProvider;
+
   @override
   Widget build(BuildContext context) {
+    userDataProvider = Provider.of<UserDataProvider>(context);
     return Drawer(
       child: ListView(
         children: [
@@ -34,19 +41,19 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.login),
-            iconColor: Colors.black,
-            title: const Text(
-              'Login',
-              style: TextStyle(
-                color: Colors.black87,
-              ),
-              ),
-            onTap: () {
-              print("X");
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.login),
+          //   iconColor: Colors.black,
+          //   title: const Text(
+          //     'Login',
+          //     style: TextStyle(
+          //       color: Colors.black87,
+          //     ),
+          //     ),
+          //   onTap: () {
+          //     print("X");
+          //   },
+          // ),
           ListTile(
             leading: const Icon(Icons.logout),
             iconColor: Colors.black,
@@ -57,7 +64,9 @@ class _NavbarState extends State<Navbar> {
               ),
               ),
             onTap: () {
-              print("X");
+              // Clear current user data
+              userDataProvider.clearData();
+              Navigator.of(context).popAndPushNamed('/');
             },
           ),
         ],

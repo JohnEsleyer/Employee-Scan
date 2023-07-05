@@ -58,6 +58,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
     }
     controller!.resumeCamera();
   }
+  
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
