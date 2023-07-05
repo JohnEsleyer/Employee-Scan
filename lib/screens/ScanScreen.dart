@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:employee_scan/widgets/CountdownTimer.dart';
-import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../navbar.dart';
 
 import '../providers/DBProvider.dart';
-import '../providers/InternetProvider.dart';
+
 import '../user_defined_functions.dart';
 
 

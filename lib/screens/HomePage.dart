@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:connectivity/connectivity.dart';
 import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
 import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
+import 'package:employee_scan/widgets/CountdownTimerSync.dart';
 import 'package:employee_scan/widgets/FadeAnimationWidget.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/DBProvider.dart';
 import '../providers/InternetProvider.dart';
+import '../widgets/CountdownTimer.dart';
 import '../widgets/neumorphic_button.dart';
 import 'ScanScreen.dart';
 
@@ -121,19 +123,11 @@ class _HomePageState extends State<HomePage> {
           internetProvider.isConnected
               ? Padding(
                   padding: const EdgeInsets.only(right:15, top: 8),
-                  child: FadeAnimationWidget(
-                    duration: Duration(seconds:1),
-                    child: Column(
-                      children: [
-                        Icon(Icons.sync, color: Colors.green),
-                        Text(
-                          'Syncing',
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: CountdownTimerSync(
+                    duration: 30,
+                    onFinished: (){
+                      db_provider.syncAttendance(context);
+                    },
                   ),
                 )
               : Padding(

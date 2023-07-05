@@ -66,7 +66,7 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                     ],
                                   )
                                   : Icon(
-                                      Icons.radio_button_checked_outlined,
+                                      Icons.radio_button_off,
                                       size: 50,
                                       
                                     ),
