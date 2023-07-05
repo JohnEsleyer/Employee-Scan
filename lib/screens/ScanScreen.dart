@@ -94,6 +94,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
       });
       // Check if data is JSON
       if (isJSON(scanData.code as String)) {
+        notJSON = false;
         Map<String, dynamic> data = jsonDecode(scanData.code as String);
         setState(() {
           temp = "Is JSON";
@@ -260,7 +261,11 @@ class _QRViewScreenState extends State<QRViewScreen> {
                 ),
               ),
               const SizedBox(
-                height: 40,
+                height: 10,
+              ),
+              Text("Double tap to flip the camera"),
+              const SizedBox(
+                height: 20,
               ),
               Expanded(
                 // ignore: sized_box_for_whitespace
@@ -284,7 +289,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
                       ),
                       Container(
                           width: $ScreenWidth * (70 / 100),
-                          height: $ScreenHeight * (30 / 100),
+                          height: $ScreenHeight * (20 / 100),
                           padding: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
                               color: Colors.white,
