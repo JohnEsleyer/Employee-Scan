@@ -51,14 +51,19 @@ class _CountdownTimerSyncState extends State<CountdownTimerSync> {
   @override
   Widget build(BuildContext context) {
     return FadeAnimationWidget(
-      child: Text(
-        '$_remainingTime seconds',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.green,
-        ),
+      child: Column(
+        children: [
+          Icon(Icons.sync, color: Colors.green),
+          Text(
+            '$_remainingTime',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          ),
+        ],
       ),
     );
   }
