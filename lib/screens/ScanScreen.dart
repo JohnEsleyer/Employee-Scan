@@ -276,6 +276,8 @@ class _QRViewScreenState extends State<QRViewScreen> {
                                     controller?.resumeCamera();
                                     setState(() {
                                       didScan = false;
+                                      borderColor =
+                                          Color.fromARGB(255, 255, 255, 255);
                                     });
                                   }),
                             )
@@ -285,7 +287,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
                       ),
                       Container(
                           width: $ScreenWidth * (70 / 100),
-                          height: $ScreenHeight * (20 / 100),
+                          height: $ScreenHeight * (30 / 100),
                           padding: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
                               color: Colors.white,

@@ -54,15 +54,15 @@ class _CountdownTimerSyncState extends State<CountdownTimerSync> {
       child: Column(
         children: [
           Icon(Icons.sync, color: Colors.green),
-          Text(
-            '$_remainingTime',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
+          // Text(
+          //   '$_remainingTime',
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     fontSize: 15,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.green,
+          //   ),
+          // ),
         ],
       ),
     );

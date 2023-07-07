@@ -31,7 +31,7 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
         elevation: 0.0,
         backgroundColor: Colors.white,
         title: Text(
-          "Local database",
+          "Local Attendance Records",
           style: TextStyle(
             color: Colors.black,
           ),
@@ -183,7 +183,8 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                       );
                     }
                   } else {
-                    return CircularProgressIndicator(color: Colors.blue);
+                    return Center(
+                        child: CircularProgressIndicator(color: Colors.blue));
                   }
                 },
               )

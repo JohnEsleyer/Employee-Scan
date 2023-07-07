@@ -11,12 +11,10 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-
 import '../providers/DBProvider.dart';
 import '../providers/InternetProvider.dart';
 
 import 'ScanScreen.dart';
-
 
 class HomePage extends StatefulWidget {
   @override
@@ -31,11 +29,10 @@ class _HomePageState extends State<HomePage> {
   String debug = '';
   int _selectedIndex = 1;
 
-
   @override
   void initState() {
     super.initState();
-   
+
     startBackgroundTask();
   }
 
@@ -46,7 +43,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> startBackgroundTask() async {
-
     receivePort = ReceivePort();
 
     isolate =
@@ -76,7 +72,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  
   final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
     BottomNavigationBarItem(
       icon: Icon(Icons.people),
@@ -92,7 +87,6 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
-
   @override
   Widget build(BuildContext context) {
     db_provider = Provider.of<DatabaseProvider>(context);
@@ -102,7 +96,7 @@ class _HomePageState extends State<HomePage> {
       db_provider.syncAttendance(context);
     }
 
-    final GlobalKey<ScaffoldState> _key = GlobalKey(); 
+    final GlobalKey<ScaffoldState> _key = GlobalKey();
 
     return Scaffold(
       key: _key,
@@ -110,19 +104,21 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         items: _bottomNavigationBarItems,
         currentIndex: _selectedIndex,
-        onTap: (int index){
+        onTap: (int index) {
           setState(() {
             _selectedIndex = index;
           });
         },
       ),
       appBar: AppBar(
-        
         leading: GestureDetector(
-          onTap: (){
-           _key.currentState!.openDrawer();
+          onTap: () {
+            _key.currentState!.openDrawer();
           },
-          child: Icon(Icons.menu, color: Colors.black,),
+          child: Icon(
+            Icons.menu,
+            color: Colors.black,
+          ),
         ),
         title: const Text(
           'Employee Scan',
@@ -133,10 +129,10 @@ class _HomePageState extends State<HomePage> {
         actions: [
           internetProvider.isConnected
               ? Padding(
-                  padding: const EdgeInsets.only(right:15, top: 8),
+                  padding: const EdgeInsets.only(right: 15, top: 15),
                   child: CountdownTimerSync(
                     duration: 30,
-                    onFinished: (){
+                    onFinished: () {
                       db_provider.syncAttendance(context);
                     },
                   ),
@@ -161,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       body: _getBody(),
     );
   }
+
   Widget _getBody() {
     switch (_selectedIndex) {
       case 0:
@@ -173,5 +170,4 @@ class _HomePageState extends State<HomePage> {
         return Container();
     }
   }
-
 }
