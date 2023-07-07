@@ -9,7 +9,6 @@ import 'dart:convert';
 
 import '../user_defined_functions.dart';
 
-
 class DatabaseProvider extends ChangeNotifier {
   final Database db;
 
@@ -28,6 +27,10 @@ class DatabaseProvider extends ChangeNotifier {
     });
   }
 
+  Future<void> clearAllAttendance() async {
+    await db.delete('attendance');
+  }
+
   Future<void> updateTimeOut(
       int employee_id, int company_id, String newTimeOut) async {
     final whereArgs = [employee_id, company_id];
@@ -37,8 +40,7 @@ class DatabaseProvider extends ChangeNotifier {
         where: 'employee_id = ? and company_id = ?', whereArgs: whereArgs);
   }
 
-  Future<void> updateSync(
-      int employee_id, int company_id, int new_sync) async {
+  Future<void> updateSync(int employee_id, int company_id, int new_sync) async {
     final whereArgs = [employee_id, company_id];
     final updates = {'sync': new_sync};
 
@@ -104,7 +106,8 @@ class DatabaseProvider extends ChangeNotifier {
     return results.isNotEmpty;
   }
 
-  Future<void> insertEmployee(int employee_id, String first_name, String last_name, int company ) async {
+  Future<void> insertEmployee(
+      int employee_id, String first_name, String last_name, int company) async {
     await db.insert('employee', {
       'id': employee_id,
       'first_name': first_name,
@@ -112,7 +115,6 @@ class DatabaseProvider extends ChangeNotifier {
       'company': company,
     });
   }
-
 
   Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
     print('Executed getAllEmployeeRecords');
@@ -130,8 +132,6 @@ class DatabaseProvider extends ChangeNotifier {
 
     return employeeRecords;
   }
-
-  
 
   Future<bool> isEmployeeExists(int employee_id) async {
     final result =
@@ -162,74 +162,72 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> syncAttendance(BuildContext context) async {
-  try {
-    // Retrieve all attendance records
-    List<Map<String, dynamic>> attendances =
-        await getAllAttendanceRecords();
-    print('Total attendance records: ${attendances.length}');
+    try {
+      // Retrieve all attendance records
+      List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
+      print('Total attendance records: ${attendances.length}');
 
-    // Counter to track synced records
-    int counter = 0;
+      // Counter to track synced records
+      int counter = 0;
 
-    // Iterate through each attendance record
-    for (int i = 0; i < attendances.length; i++) {
-      // Check if the record is not yet synced
-      if (attendances[i]['sync'] == 0) {
-        final url = API_URL + '/attendance';
-        final requestBody = {
-          "employee_id": attendances[i]['employee_id'],
-          "company_id": attendances[i]['company_id'],
-          "scanner_id": attendances[i]['scanner_id'],
-          "time_in": attendances[i]['time_in'],
-          "time_out": attendances[i]['time_out'],
-          "date_entered": attendances[i]['date_entered'],
-        };
+      // Iterate through each attendance record
+      for (int i = 0; i < attendances.length; i++) {
+        // Check if the record is not yet synced
+        if (attendances[i]['sync'] == 0) {
+          final url = API_URL + '/attendance';
+          final requestBody = {
+            "employee_id": attendances[i]['employee_id'],
+            "company_id": attendances[i]['company_id'],
+            "scanner_id": attendances[i]['scanner_id'],
+            "time_in": attendances[i]['time_in'],
+            "time_out": attendances[i]['time_out'],
+            "date_entered": attendances[i]['date_entered'],
+          };
 
-        // Check if the record has a valid time_out value
-        if (attendances[i]['time_out'] == 'not set') {
-          print('Invalid record: ${attendances[i]}');
-        } else {
-          try {
-            String token = Provider.of<UserDataProvider>(context, listen: false).getToken;
+          // Check if the record has a valid time_out value
+          if (attendances[i]['time_out'] == 'not set') {
+            print('Invalid record: ${attendances[i]}');
+          } else {
+            try {
+              String token =
+                  Provider.of<UserDataProvider>(context, listen: false)
+                      .getToken;
 
-            Map<String, String> headers = {
-              "Authorization": "Bearer $token",
-              "Content-Type": "application/json",
-              "Accept": "application/json"
-            };
-            // Send a POST request to the API
-            final response = await http.post(
-              Uri.parse(url),
-              body: json.encode(requestBody),
-              headers: headers,
-            );
+              Map<String, String> headers = {
+                "Authorization": "Bearer $token",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              };
+              // Send a POST request to the API
+              final response = await http.post(
+                Uri.parse(url),
+                body: json.encode(requestBody),
+                headers: headers,
+              );
 
-            if (response.statusCode == 200) {
-              // Request successful
-              final responseBody = json.decode(response.body);
-              print('Response body: $responseBody');
+              if (response.statusCode == 200) {
+                // Request successful
+                final responseBody = json.decode(response.body);
+                print('Response body: $responseBody');
 
-              // Update the record's sync status
-              await updateSync(
-                  attendances[i]['employee_id'],
-                  attendances[i]['company_id'],
-                  1);
-            } else {
-              // Request failed
-              print('Request failed');
+                // Update the record's sync status
+                await updateSync(attendances[i]['employee_id'],
+                    attendances[i]['company_id'], 1);
+              } else {
+                // Request failed
+                print('Request failed');
+              }
+            } catch (error) {
+              print('Error: $error');
             }
-          } catch (error) {
-            print('Error: $error');
+            counter++;
           }
-          counter++;
         }
       }
+      print('Total records synced: $counter');
+    } catch (error) {
+      print('Error: $error');
     }
-    print('Total records synced: $counter');
-  } catch (error) {
-    print('Error: $error');
   }
-}
 }
