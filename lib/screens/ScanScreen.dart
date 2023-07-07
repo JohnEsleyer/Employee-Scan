@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -15,9 +14,6 @@ import '../navbar.dart';
 import '../providers/DBProvider.dart';
 
 import '../user_defined_functions.dart';
-
-
-
 
 class QRViewScreen extends StatefulWidget {
   const QRViewScreen({Key? key}) : super(key: key);
@@ -58,7 +54,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
     }
     controller!.resumeCamera();
   }
-  
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
@@ -117,7 +112,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
             // Check if employee was already recorded
             DateTime currentDate = DateTime.now();
             String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
-            String formattedTime = DateFormat('HH:mm a').format(currentDate);
+            String formattedTime = DateFormat('hh:mm a').format(currentDate);
             bool recordExists = await db_provider.isAttendanceRecordExistsDate(
                 data['employee'], formattedDate);
             if (recordExists) {
@@ -213,8 +208,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
     var $generalCam = 250.0;
     // var $logoPercentage = 10;
 
-
-
     db_provider = Provider.of<DatabaseProvider>(context);
     return Scaffold(
         key: scaffoldKey,
@@ -223,7 +216,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
           child: Column(
             children: [
               const SizedBox(height: 30),
- 
 
               // ignore: sized_box_for_whitespace
               GestureDetector(
@@ -275,16 +267,19 @@ class _QRViewScreenState extends State<QRViewScreen> {
                   // color: Colors.white,
                   child: Column(
                     children: [
-                      (didScan) ?
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CountdownTimer(duration: 3, onFinished: (){
-                          controller?.resumeCamera();
-                          setState(() {
-                            didScan = false;
-                          });
-                        }),
-                      ) : Container(),
+                      (didScan)
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CountdownTimer(
+                                  duration: 3,
+                                  onFinished: () {
+                                    controller?.resumeCamera();
+                                    setState(() {
+                                      didScan = false;
+                                    });
+                                  }),
+                            )
+                          : Container(),
                       const SizedBox(
                         height: 20,
                       ),
@@ -325,91 +320,101 @@ class _QRViewScreenState extends State<QRViewScreen> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              (!notJSON) ? 
-                              Container(
-                                child:(temp == 'Employee not found!')
-                                  ? SizedBox(
-                                      width: $ScreenWidth,
-                                      // height: 30,
-                                      child: Column(
-                                        children: [
-                                          Text('INVALID',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                          SizedBox(height: 10),
-                                          Text(temp,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                        ],
-                                      ))
-                                  : SizedBox(
-                                      width: $ScreenWidth,
-                                      // height: 30,
-                                      child: (result?.code == null)
-                                          ? const Text('No ID scanned',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                // fontWeight: FontWeight.bold
+                              (!notJSON)
+                                  ? Container(
+                                      child: (temp == 'Employee not found!')
+                                          ? SizedBox(
+                                              width: $ScreenWidth,
+                                              // height: 30,
+                                              child: Column(
+                                                children: [
+                                                  Text('INVALID',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 25,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        // fontWeight: FontWeight.bold
+                                                      )),
+                                                  SizedBox(height: 10),
+                                                  Text(temp,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        // fontWeight: FontWeight.bold
+                                                      )),
+                                                ],
                                               ))
-                                          : Column(
-                                              children: [
-                                                Text('$id',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 25,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      // fontWeight: FontWeight.bold
+                                          : SizedBox(
+                                              width: $ScreenWidth,
+                                              // height: 30,
+                                              child: (result?.code == null)
+                                                  ? const Text('No ID scanned',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        // fontWeight: FontWeight.bold
+                                                      ))
+                                                  : Column(
+                                                      children: [
+                                                        Text('$id',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontSize: 25,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              // fontWeight: FontWeight.bold
+                                                            )),
+                                                        SizedBox(height: 10),
+                                                        Text(
+                                                            '$last_name, $first_name',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              // fontWeight: FontWeight.bold
+                                                            )),
+                                                        Text(temp,
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              // fontWeight: FontWeight.bold
+                                                            )),
+                                                      ],
                                                     )),
-                                                SizedBox(height: 10),
-                                                Text('$last_name, $first_name',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 15,
-                                                      // fontWeight: FontWeight.bold
-                                                    )),
-                                                Text(temp,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      // fontWeight: FontWeight.bold
-                                                    )),
-                                              ],
-                                            )),
-                              ) : Container(
-                                child: SizedBox(
-                                      width: $ScreenWidth,
-                                      // height: 30,
-                                      child: Column(
-                                        children: [
-                                          Text('INVALID',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                          SizedBox(height: 10),
-                                          Text(temp,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                // fontWeight: FontWeight.bold
-                                              )),
-                                        ],
-                                      )),
-                              ),
-                              
+                                    )
+                                  : Container(
+                                      child: SizedBox(
+                                          width: $ScreenWidth,
+                                          // height: 30,
+                                          child: Column(
+                                            children: [
+                                              Text('INVALID',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 25,
+                                                    fontWeight: FontWeight.bold,
+                                                    // fontWeight: FontWeight.bold
+                                                  )),
+                                              SizedBox(height: 10),
+                                              Text(temp,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    // fontWeight: FontWeight.bold
+                                                  )),
+                                            ],
+                                          )),
+                                    ),
                             ],
                           )),
                       const SizedBox(
@@ -424,4 +429,3 @@ class _QRViewScreenState extends State<QRViewScreen> {
         ));
   }
 }
-
