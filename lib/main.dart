@@ -24,9 +24,9 @@ void main() async {
   Database db = await openDatabase(dbPath, version: 1, onCreate: (db, version) {
     // Create the tables in the database.
     db.execute(
-        'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, company INTEGER);');
+        'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, department INTEGER);');
     db.execute(
-        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, company_id INTEGER, scanner_id INTEGER, time_in TEXT, time_out TEXT, date_entered TEXT, sync INTEGER);');
+        'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, office_id INTEGER, time_in TEXT, time_out TEXT, sync INTEGER);');
   });
 
   

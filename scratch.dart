@@ -1,34 +1,19 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+import 'package:intl/intl.dart';
 
-import 'package:http/http.dart' as http;
+String convertToFormattedDateTime(String dateTimeString) {
+  // Parse the input string to a DateTime object
+  DateTime dateTime = DateTime.parse(dateTimeString);
 
-void main() async {
-  // Get the bearer token from somewhere
-  String token = "7|W5VhsRJmt7E6FwUi2PANqrZ8iB6EgyoHHjbGEJ8G";
-  print("1");
-  // Create the request URL
-  Uri url = Uri.parse("http://ojt.infoactiv.org/api/employee");
+  // Create a DateFormat object with the desired format
+  DateFormat dateFormat = DateFormat('yyyy-MM-dd hh:mm a');
 
-  // Create the headers
-  Map<String, String> headers = {
-    "Authorization": "Bearer $token",
-    "Accept": "application/json"
-  };
-  print("1");
-  // Make the request
-  http.Response response = await http.get(url, headers: headers);
-  print("1");
-  // Check the status code
-  if (response.statusCode == 200) {
-    // The request was successful, parse the body
-    String body = response.body;
-    var user = jsonDecode(body);
-    print(user);
-  } else {
-    // The request failed, print the error
-    print(response.statusCode);
-    print(response.body);
-  }
+  // Format the DateTime object using the DateFormat
+  String formattedDateTime = dateFormat.format(dateTime);
+
+  return formattedDateTime;
+}
+
+void main(){
+  var timeNow = DateTime.now();
+  print(convertToFormattedDateTime(timeNow.toString()));
 }

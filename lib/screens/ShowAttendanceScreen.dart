@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -152,8 +155,9 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  Text(attendanceRecord[
-                                                      'time_in']),
+                                                  
+                                                  Text(convertToFormattedDateTime(attendanceRecord[
+                                                      'time_in'])),
                                                 ],
                                               ),
                                               Row(
@@ -165,8 +169,8 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  Text(attendanceRecord[
-                                                      'time_out']),
+                                                  Text(convertToFormattedDateTime(attendanceRecord[
+                                                      'time_out'])),
                                                 ],
                                               )
                                             ]),

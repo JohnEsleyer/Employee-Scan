@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:employee_scan/widgets/CountdownTimer.dart';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -96,88 +95,82 @@ class _QRViewScreenState extends State<QRViewScreen> {
           temp = "Is JSON";
         });
         // Check if qr code belongs to the company
-        if (data['company'] == 111) {
+
+        setState(() {
+          temp = "Infoactiv";
+        });
+
+        // Check employee existence
+        bool employeeExists =
+            await db_provider.isEmployeeExists(data['employee']);
+        if (employeeExists) {
           setState(() {
-            temp = "Infoactiv";
+            temp = 'OK';
           });
 
-          // Check employee existence
-          bool employeeExists =
-              await db_provider.isEmployeeExists(data['employee']);
-          if (employeeExists) {
-            setState(() {
-              temp = 'OK';
-            });
+          // Check if employee was already recorded
+          DateTime currentDate = DateTime.now();
+          // String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
+          // String formattedTime = DateFormat('hh:mm a').format(currentDate);
+          bool recordExists =
+              await db_provider.isAttendanceRecordExists(data['employee']);
+          if (recordExists) {
+            Map<String, dynamic> attendanceRecord =
+                await db_provider.getAttendanceByEmployeeId(data['employee']);
+            if (attendanceRecord.isNotEmpty) {
+              // Process the retrieved attendance record
+              String timeIn = attendanceRecord['time_in'];
+              String timeOut = attendanceRecord['time_out'];
 
-            // Check if employee was already recorded
-            DateTime currentDate = DateTime.now();
-            String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
-            String formattedTime = DateFormat('hh:mm a').format(currentDate);
-            bool recordExists = await db_provider.isAttendanceRecordExistsDate(
-                data['employee'], formattedDate);
-            if (recordExists) {
-              Map<String, dynamic> attendanceRecord =
-                  await db_provider.getAttendanceByEmployeeIdAndCompany(
-                      data['employee'], data['company']);
-              if (attendanceRecord.isNotEmpty) {
-                // Process the retrieved attendance record
-                String timeIn = attendanceRecord['time_in'];
-                String timeOut = attendanceRecord['time_out'];
+              temp = 'Time In: $timeIn, Time Out: $timeOut';
 
-                temp = 'Time In: $timeIn, Time Out: $timeOut';
-
-                if (timeOut == 'not set') {
-                  temp = 'not set';
-                  // Update timeOut
-                  await db_provider.updateTimeOut(
-                      data['employee'], data['company'], formattedTime);
-                  Map<String, dynamic>? employee =
-                      await db_provider.getEmployeeById(data['employee']);
-                  setState(() {
-                    temp = 'Time out recorded!';
-                    id = data['employee'];
-                    first_name = employee?['first_name'];
-                    last_name = employee?['last_name'];
-                  });
-                } else {
-                  Map<String, dynamic>? employee =
-                      await db_provider.getEmployeeById(data['employee']);
-                  setState(() {
-                    id = data['employee'];
-                    first_name = employee?['first_name'];
-                    last_name = employee?['last_name'];
-                    temp = 'Attendance was already set for today';
-                    borderColor = Colors.amber;
-                  });
-                }
+              if (timeOut == 'not set') {
+                temp = 'not set';
+                // Update timeOut
+                await db_provider.updateTimeOut(
+                    data['employee'], currentDate.toString());
+                Map<String, dynamic>? employee =
+                    await db_provider.getEmployeeById(data['employee']);
+                setState(() {
+                  temp = 'Time out recorded!';
+                  id = data['employee'];
+                  first_name = employee?['first_name'];
+                  last_name = employee?['last_name'];
+                });
               } else {
-                temp = 'No attendance record found ';
+                Map<String, dynamic>? employee =
+                    await db_provider.getEmployeeById(data['employee']);
+                setState(() {
+                  id = data['employee'];
+                  first_name = employee?['first_name'];
+                  last_name = employee?['last_name'];
+                  temp = 'Attendance was already set for today';
+                  borderColor = Colors.amber;
+                });
               }
             } else {
-              // Generate a v4 (random) UUID
-              // var uuid = Uuid();
-              // String randomUuid = uuid.v4();
-
-              await db_provider.insertAttendance(data['employee'],
-                  data['company'], 1, formattedTime, 'not set', formattedDate);
-
-              Map<String, dynamic>? employee =
-                  await db_provider.getEmployeeById(data['employee']);
-              setState(() {
-                temp = 'Time in recorded!';
-                id = data['employee'];
-                first_name = employee?['first_name'];
-                last_name = employee?['last_name'];
-              });
+              temp = 'No attendance record found ';
             }
           } else {
+            // Generate a v4 (random) UUID
+            // var uuid = Uuid();
+            // String randomUuid = uuid.v4();
+
+            await db_provider.insertAttendance(
+                data['employee'], 1, currentDate.toString(), 'not set');
+
+            Map<String, dynamic>? employee =
+                await db_provider.getEmployeeById(data['employee']);
             setState(() {
-              temp = 'Employee not found!';
+              temp = 'Time in recorded!';
+              id = data['employee'];
+              first_name = employee?['first_name'];
+              last_name = employee?['last_name'];
             });
           }
         } else {
           setState(() {
-            temp = "Does not belong!";
+            temp = 'Employee not found!';
           });
         }
       } else {
