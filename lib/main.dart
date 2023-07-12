@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:employee_scan/providers/DBProvider.dart';
-import 'package:employee_scan/providers/UserDataProvider.dart';
+
 import 'package:employee_scan/screens/SettingsScreen.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,9 +42,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => DatabaseProvider(db),
         ),
-        ChangeNotifierProvider(
-          create: (_) => UserDataProvider(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (_) => UserDataProvider(),
+        // ),
       ],
       child: MaterialApp(
         theme: ThemeData.light(),
@@ -102,8 +103,8 @@ class _LoginState extends State<Login> {
       String body = response.body;
       var result = jsonDecode(body);
 
-      Provider.of<UserDataProvider>(context, listen: false)
-          .setToken(result['token']);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', result['token']);
 
       return true;
     } else {
@@ -287,10 +288,14 @@ class EmployeeScan extends StatefulWidget {
 
 class _EmployeeScanState extends State<EmployeeScan> {
   late DatabaseProvider db_provider;
-  String token = '';
+
 
 
   Future<List<dynamic>> fetchEmployeeList() async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String token = prefs.getString('token') ?? '';
     Map<String, String> headers = {
       "Authorization": "Bearer $token",
       "Content-Type": "application/json",
@@ -315,7 +320,6 @@ class _EmployeeScanState extends State<EmployeeScan> {
 
   @override
   Widget build(BuildContext context) {
-    token = Provider.of<UserDataProvider>(context).getToken;
 
     db_provider = Provider.of<DatabaseProvider>(context);
     return Container(

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/UserDataProvider.dart';
 
 class Navbar extends StatefulWidget {
   const Navbar({ Key? key }) : super(key: key);
@@ -12,11 +10,11 @@ class Navbar extends StatefulWidget {
 
 class _NavbarState extends State<Navbar> {
 
-  late UserDataProvider userDataProvider;
+
 
   @override
   Widget build(BuildContext context) {
-    userDataProvider = Provider.of<UserDataProvider>(context);
+
     return Drawer(
       child: ListView(
         children: [
@@ -52,8 +50,6 @@ class _NavbarState extends State<Navbar> {
               ),
               ),
             onTap: () {
-              // Clear current user data
-              userDataProvider.clearData();
               Navigator.of(context).popAndPushNamed('/');
             },
           ),
@@ -68,8 +64,7 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
             onTap: () {
-              // Clear current user data
-              userDataProvider.clearData();
+
               Navigator.of(context).pushNamed('/settings');
             },
           ),
