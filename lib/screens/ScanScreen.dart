@@ -96,10 +96,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
         });
         // Check if qr code belongs to the company
 
-        setState(() {
-          temp = "Infoactiv";
-        });
-
         // Check employee existence
         bool employeeExists =
             await db_provider.isEmployeeExists(data['employee']);
@@ -110,7 +106,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
 
           // Check if employee was already recorded
           DateTime currentDate = DateTime.now();
-     
+
           bool recordExists =
               await db_provider.isAttendanceRecordExists(data['employee']);
           if (recordExists) {
@@ -118,15 +114,14 @@ class _QRViewScreenState extends State<QRViewScreen> {
                 await db_provider.getAttendanceByEmployeeId(data['employee']);
             if (attendanceRecord.isNotEmpty) {
               // Process the retrieved attendance record
-              String timeIn = attendanceRecord['time_in'];
-              String timeOut = attendanceRecord['time_out'];
 
-              temp = 'Time In: $timeIn, Time Out: $timeOut';
+              String timeOutAM = attendanceRecord['time_out_am'];
 
-              if (timeOut == 'not set') {
+
+              if (timeOutAM == 'not set') {
                 temp = 'not set';
                 // Update timeOut
-                await db_provider.updateTimeOut(
+                await db_provider.updateTimeOutAM(
                     data['employee'], currentDate.toString());
                 Map<String, dynamic>? employee =
                     await db_provider.getEmployeeById(data['employee']);
@@ -137,15 +132,53 @@ class _QRViewScreenState extends State<QRViewScreen> {
                   last_name = employee?['last_name'];
                 });
               } else {
-                Map<String, dynamic>? employee =
+                String timeInPM = attendanceRecord['time_in_pm'];
+
+                if (timeInPM == 'not set'){
+                  temp = 'not set';
+                  // Update timeOut
+                  await db_provider.updateTimeInPM(
+                      data['employee'], currentDate.toString());
+                  Map<String, dynamic>? employee =
+                      await db_provider.getEmployeeById(data['employee']);
+                  setState(() {
+                    temp = 'Time out recorded!';
+                    id = data['employee'];
+                    first_name = employee?['first_name'];
+                    last_name = employee?['last_name'];
+                  });
+                }else{
+                  String timeOutPM = attendanceRecord['time_out_pm'];
+
+                  if (timeOutPM == 'not set'){
+                     temp = 'not set';
+                    // Update timeOut
+                    await db_provider.updateTimeOutPM(
+                        data['employee'], currentDate.toString());
+                    Map<String, dynamic>? employee =
+                        await db_provider.getEmployeeById(data['employee']);
+                    setState(() {
+                      temp = 'Time out recorded!';
+                      id = data['employee'];
+                      first_name = employee?['first_name'];
+                      last_name = employee?['last_name'];
+                    });
+                  }else{
+                    Map<String, dynamic>? employee =
                     await db_provider.getEmployeeById(data['employee']);
-                setState(() {
-                  id = data['employee'];
-                  first_name = employee?['first_name'];
-                  last_name = employee?['last_name'];
-                  temp = 'Attendance was already set for today';
-                  borderColor = Colors.amber;
-                });
+                    setState(() {
+                      id = data['employee'];
+                      first_name = employee?['first_name'];
+                      last_name = employee?['last_name'];
+                      temp = 'Attendance was already set for today';
+                      borderColor = Colors.amber;
+                    });
+
+                  }
+
+                }
+                
+                
               }
             } else {
               temp = 'No attendance record found ';
@@ -156,7 +189,13 @@ class _QRViewScreenState extends State<QRViewScreen> {
             // String randomUuid = uuid.v4();
 
             await db_provider.insertAttendance(
-                data['employee'], 1, currentDate.toString(), 'not set');
+              data['employee'],
+              1,
+              currentDate.toString(),
+              'not set',
+              'not set',
+              'not set',
+            );
 
             Map<String, dynamic>? employee =
                 await db_provider.getEmployeeById(data['employee']);
