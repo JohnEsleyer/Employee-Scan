@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:employee_scan/providers/DBProvider.dart';
 import 'package:employee_scan/providers/UserDataProvider.dart';
+import 'package:employee_scan/screens/SettingsScreen.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -51,6 +52,7 @@ void main() async {
         routes: {
           '/': (_) => const Login(),
           '/home': (_) => EmployeeScan(),
+          '/settings': (_) => SettingsScreen(),
         },
       ),
     ),

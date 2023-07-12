@@ -41,19 +41,7 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.login),
-          //   iconColor: Colors.black,
-          //   title: const Text(
-          //     'Login',
-          //     style: TextStyle(
-          //       color: Colors.black87,
-          //     ),
-          //     ),
-          //   onTap: () {
-          //     print("X");
-          //   },
-          // ),
+          
           ListTile(
             leading: const Icon(Icons.logout),
             iconColor: Colors.black,
@@ -67,6 +55,22 @@ class _NavbarState extends State<Navbar> {
               // Clear current user data
               userDataProvider.clearData();
               Navigator.of(context).popAndPushNamed('/');
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.logout),
+            iconColor: Colors.black,
+            title: const Text(
+              'Settings',
+              style: TextStyle(
+                color: Colors.black87,
+              ),
+            ),
+            onTap: () {
+              // Clear current user data
+              userDataProvider.clearData();
+              Navigator.of(context).popAndPushNamed('/settings');
             },
           ),
         ],
