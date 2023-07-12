@@ -178,7 +178,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> getAllUsers() async {
-    return await db.query('users');
+    return await db.query('user');
   }
 
   Future<Map<String, dynamic>?> getEmployeeById(int id) async {

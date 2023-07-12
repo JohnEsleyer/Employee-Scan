@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../providers/UserDataProvider.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -17,7 +16,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late bool _offline_login;
   late SharedPreferences _prefs;
-  late String _token;
+
   late DatabaseProvider _db_provider;
 
   @override
@@ -42,18 +41,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> fetchUsers() async {
-    print('Executed fetch Users');
-    var url = Uri.parse('$API_URL/users');
+    String token = _prefs.getString('token') ?? '';
+    var url = Uri.parse(API_URL + '/users');
+      Map<String, String> headers = {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    };
 
-    try {
-      var headers = {
-        'Authorization': 'Bearer $_token',
-        'Accept': 'application/json',
-      };
       var response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        print(response.body);
+  
         List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
         
         for (int i = 0; i < data.length; i++) {
@@ -67,16 +66,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         }
       } else {
-
+       print('Error');
       }
-    } catch (e) {
-      print('Exception: $e');
-    }
+
   }
 
   @override
   Widget build(BuildContext context) {
-    _token = Provider.of<UserDataProvider>(context).getToken;
     _db_provider = Provider.of<DatabaseProvider>(context);
 
     return Scaffold(
@@ -84,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           children: [
             SwitchListTile(
-              title: Text("Select all"),
+              title: Text("Offline Login"),
               value: _offline_login,
               onChanged: (value) async {
                 setState(() {
@@ -98,7 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       content: Text('Fetching all users from the server...'),
                       showCloseIcon: false,),
                   );
-                  print('Before fetch users');
+
                   await fetchUsers();
                   // ScaffoldMessenger.of(context).clearSnackBars();
                  
