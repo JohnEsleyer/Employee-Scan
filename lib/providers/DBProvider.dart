@@ -2,6 +2,7 @@ import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -197,7 +198,7 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> syncAttendance(BuildContext context) async {
+  Future<void> syncAttendance() async {
     try {
       // Retrieve all attendance records
       List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
@@ -225,10 +226,9 @@ class DatabaseProvider extends ChangeNotifier {
             print('Invalid record: ${attendances[i]}');
           } else {
             try {
-              String token =
-                  Provider.of<UserDataProvider>(context, listen: false)
-                      .getToken;
-
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String token = prefs.getString('token') ?? '';
+              
               Map<String, String> headers = {
                 "Authorization": "Bearer $token",
                 "Content-Type": "application/json",

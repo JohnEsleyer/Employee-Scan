@@ -142,7 +142,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
                   Map<String, dynamic>? employee =
                       await db_provider.getEmployeeById(data['employee']);
                   setState(() {
-                    temp = 'Time out recorded!';
+                    temp = 'Time in recorded!';
                     id = data['employee'];
                     first_name = employee?['first_name'];
                     last_name = employee?['last_name'];
