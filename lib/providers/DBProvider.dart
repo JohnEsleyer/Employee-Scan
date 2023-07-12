@@ -16,13 +16,12 @@ class DatabaseProvider extends ChangeNotifier {
   DatabaseProvider(this.db);
 
   Future<void> insertAttendance(
-    int employee_id,
-    int office_id,
-    String time_in_am,
-    String time_out_am,
-    String time_in_pm, 
-    String time_out_pm
-  ) async {
+      int employee_id,
+      int office_id,
+      String time_in_am,
+      String time_out_am,
+      String time_in_pm,
+      String time_out_pm) async {
     await db.insert('attendance', {
       'employee_id': employee_id,
       'office_id': office_id,
@@ -42,7 +41,6 @@ class DatabaseProvider extends ChangeNotifier {
     await db.delete('attendance', where: 'sync = ?', whereArgs: [1]);
   }
 
-
   Future<void> updateTimeOutAM(int employee_id, String newTimeOut) async {
     final whereArgs = [employee_id];
     final updates = {'time_out_am': newTimeOut};
@@ -50,7 +48,8 @@ class DatabaseProvider extends ChangeNotifier {
     await db.update('attendance', updates,
         where: 'employee_id = ?', whereArgs: whereArgs);
   }
-   Future<void> updateTimeInPM(int employee_id, String newTimeOut) async {
+
+  Future<void> updateTimeInPM(int employee_id, String newTimeOut) async {
     final whereArgs = [employee_id];
     final updates = {'time_in_pm': newTimeOut};
 
@@ -58,7 +57,7 @@ class DatabaseProvider extends ChangeNotifier {
         where: 'employee_id = ?', whereArgs: whereArgs);
   }
 
-   Future<void> updateTimeOutPM(int employee_id, String newTimeOut) async {
+  Future<void> updateTimeOutPM(int employee_id, String newTimeOut) async {
     final whereArgs = [employee_id];
     final updates = {'time_out_pm': newTimeOut};
 
@@ -130,8 +129,8 @@ class DatabaseProvider extends ChangeNotifier {
   //   return results.isNotEmpty;
   // }
 
-  Future<void> insertUser(int id, String first_name,
-      String last_name, String username, String password) async {
+  Future<void> insertUser(int id, String first_name, String last_name,
+      String username, String password) async {
     await db.insert('user', {
       'id': id,
       'first_name': first_name,
@@ -140,7 +139,6 @@ class DatabaseProvider extends ChangeNotifier {
       'password': password,
     });
   }
-
 
   Future<void> insertEmployee(int employee_id, String first_name,
       String last_name, int department) async {
@@ -198,7 +196,7 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> syncAttendance() async {
+  Future<void> sync() async {
     try {
       // Retrieve all attendance records
       List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
@@ -228,7 +226,7 @@ class DatabaseProvider extends ChangeNotifier {
             try {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               String token = prefs.getString('token') ?? '';
-              
+
               Map<String, String> headers = {
                 "Authorization": "Bearer $token",
                 "Content-Type": "application/json",
@@ -260,6 +258,43 @@ class DatabaseProvider extends ChangeNotifier {
         }
       }
       print('Total records synced: $counter');
+
+      // Sync Employee
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      String token = prefs.getString('token') ?? '';
+      Map<String, String> headers = {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      final response = await http.get(
+        Uri.parse(API_URL + '/employee'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        print("200");
+        // The request was successful, parse the JSON
+        var data = jsonDecode(response.body);
+
+        for (int i = 0; i < data!.length; i++) {
+          try {
+            // Insert data into the database
+            insertEmployee(data[i]['id'], data[i]['first_name'],
+                data[i]['last_name'], data[i]['department_id']);
+          } catch (error) {
+            print('Error: Error at inserting employee ($error)');
+          }
+        }
+      } else {
+        print("Error");
+        // The request failed, throw an error
+        throw Exception('Something went wrong');
+      }
+
+      //
     } catch (error) {
       print('Error: $error');
     }

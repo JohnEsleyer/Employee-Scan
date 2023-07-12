@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
     internetProvider = Provider.of<InternetProvider>(context);
 
     if (internetProvider.isConnected == true) {
-      db_provider.syncAttendance();
+      db_provider.sync();
     }
 
     final GlobalKey<ScaffoldState> _key = GlobalKey();
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                   child: CountdownTimerSync(
                     duration: 30,
                     onFinished: () {
-                      db_provider.syncAttendance();
+                      db_provider.sync();
                     },
                   ),
                 )

@@ -289,8 +289,6 @@ class EmployeeScan extends StatefulWidget {
 class _EmployeeScanState extends State<EmployeeScan> {
   late DatabaseProvider db_provider;
 
-
-
   Future<List<dynamic>> fetchEmployeeList() async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
