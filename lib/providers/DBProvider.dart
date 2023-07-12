@@ -124,6 +124,18 @@ class DatabaseProvider extends ChangeNotifier {
   //   return results.isNotEmpty;
   // }
 
+  Future<void> insertUser(int id, String first_name,
+      String last_name, String username, String password) async {
+    await db.insert('user', {
+      'id': id,
+      'first_name': first_name,
+      'last_name': last_name,
+      'username': username,
+      'password': password,
+    });
+  }
+
+
   Future<void> insertEmployee(int employee_id, String first_name,
       String last_name, int department) async {
     await db.insert('employee', {
