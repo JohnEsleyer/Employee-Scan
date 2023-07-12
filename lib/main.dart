@@ -9,7 +9,6 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/HomePage.dart';
 
@@ -329,7 +328,7 @@ class _EmployeeScanState extends State<EmployeeScan> {
               try {
                 // Insert data into the database
                 db_provider.insertEmployee(data[i]['id'], data[i]['first_name'],
-                    data[i]['last_name'], data[i]['company_id']);
+                    data[i]['last_name'], data[i]['department_id']);
               } catch (error) {
                 print('Error: Error at inserting employee ($error)');
               }

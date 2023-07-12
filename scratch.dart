@@ -1,7 +1,31 @@
 // import 'package:bcrypt/bcrypt.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+import 'package:employee_scan/user_defined_functions.dart';
 
+void main() async {
+ Map<String, String> headers = {
+      "Authorization": "Bearer 17|0IGJjPEI6lxMulpooAegLjPNSxAOes89UyDUe4j6",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    };
 
+    final response = await http.get(
+      Uri.parse(API_URL + '/employee'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      print("200");
+      // The request was successful, parse the JSON
+      print(response.body);
+    } else {
+      print("Error");
+      // The request failed, throw an error
+      throw Exception('Something went wrong');
+    }
+}
 
 
 // void main(){

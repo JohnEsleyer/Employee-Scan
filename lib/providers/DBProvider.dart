@@ -14,13 +14,21 @@ class DatabaseProvider extends ChangeNotifier {
 
   DatabaseProvider(this.db);
 
-  Future<void> insertAttendance(int employee_id, int office_id,
-      String time_in, String time_out) async {
+  Future<void> insertAttendance(
+    int employee_id,
+    int office_id,
+    String time_in_am,
+    String time_out_am,
+    String time_in_pm, 
+    String time_out_pm
+  ) async {
     await db.insert('attendance', {
       'employee_id': employee_id,
       'office_id': office_id,
-      'time_in': time_in,
-      'time_out': time_out,
+      'time_in_am': time_in_am,
+      'time_out_am': time_out_am,
+      'time_in_pm': time_in_pm,
+      'time_out_pm': time_out_pm,
       'sync': 0,
     });
   }
@@ -29,10 +37,24 @@ class DatabaseProvider extends ChangeNotifier {
     await db.delete('attendance');
   }
 
-  Future<void> updateTimeOut(
-      int employee_id, String newTimeOut) async {
+  Future<void> updateTimeOutAM(int employee_id, String newTimeOut) async {
     final whereArgs = [employee_id];
-    final updates = {'time_out': newTimeOut};
+    final updates = {'time_out_am': newTimeOut};
+
+    await db.update('attendance', updates,
+        where: 'employee_id = ?', whereArgs: whereArgs);
+  }
+   Future<void> updateTimeInPM(int employee_id, String newTimeOut) async {
+    final whereArgs = [employee_id];
+    final updates = {'time_in_pm': newTimeOut};
+
+    await db.update('attendance', updates,
+        where: 'employee_id = ?', whereArgs: whereArgs);
+  }
+
+   Future<void> updateTimeOutPM(int employee_id, String newTimeOut) async {
+    final whereArgs = [employee_id];
+    final updates = {'time_out_pm': newTimeOut};
 
     await db.update('attendance', updates,
         where: 'employee_id = ?', whereArgs: whereArgs);
@@ -48,8 +70,7 @@ class DatabaseProvider extends ChangeNotifier {
 
   Future<bool> isAttendanceRecordExists(int employee_id) async {
     final results = await db.query('attendance',
-        where: 'employee_id = ?',
-        whereArgs: [employee_id]);
+        where: 'employee_id = ?', whereArgs: [employee_id]);
 
     return results.isNotEmpty;
   }
@@ -57,8 +78,7 @@ class DatabaseProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> getAttendanceByEmployeeId(
       int employee_id) async {
     final results = await db.query('attendance',
-        where: 'employee_id = ?',
-        whereArgs: [employee_id]);
+        where: 'employee_id = ?', whereArgs: [employee_id]);
 
     if (results.isEmpty) {
       return {};
@@ -66,8 +86,10 @@ class DatabaseProvider extends ChangeNotifier {
       Map<String, dynamic> attendanceRecord = {};
       attendanceRecord['employee_id'] = results[0]['employee_id'];
       attendanceRecord['office_id'] = results[0]['office_id'];
-      attendanceRecord['time_in'] = results[0]['time_in'];
-      attendanceRecord['time_out'] = results[0]['time_out'];
+      attendanceRecord['time_in_am'] = results[0]['time_in_am'];
+      attendanceRecord['time_out_am'] = results[0]['time_out_am'];
+      attendanceRecord['time_in_pm'] = results[0]['time_in_pm'];
+      attendanceRecord['time_out_pm'] = results[0]['time_out_pm'];
       attendanceRecord['sync'] = results[0]['sync'];
       return attendanceRecord;
     }
@@ -82,8 +104,10 @@ class DatabaseProvider extends ChangeNotifier {
       attendanceRecord['id'] = row['id'];
       attendanceRecord['employee_id'] = row['employee_id'];
       attendanceRecord['office_id'] = row['office_id'];
-      attendanceRecord['time_in'] = row['time_in'];
-      attendanceRecord['time_out'] = row['time_out'];
+      attendanceRecord['time_in_am'] = row['time_in_am'];
+      attendanceRecord['time_out_am'] = row['time_out_am'];
+      attendanceRecord['time_in_pm'] = row['time_in_pm'];
+      attendanceRecord['time_out_pm'] = row['time_out_pm'];
       attendanceRecord['sync'] = row['sync'];
       attendanceRecords.add(attendanceRecord);
     }
@@ -100,8 +124,8 @@ class DatabaseProvider extends ChangeNotifier {
   //   return results.isNotEmpty;
   // }
 
-  Future<void> insertEmployee(
-      int employee_id, String first_name, String last_name, int department) async {
+  Future<void> insertEmployee(int employee_id, String first_name,
+      String last_name, int department) async {
     await db.insert('employee', {
       'id': employee_id,
       'first_name': first_name,
@@ -173,12 +197,14 @@ class DatabaseProvider extends ChangeNotifier {
           final requestBody = {
             "employee_id": attendances[i]['employee_id'],
             "office_id": attendances[i]['office_id'],
-            "time_in": attendances[i]['time_in'],
-            "time_out": attendances[i]['time_out'],
+            "time_in_am": attendances[i]['time_in_am'],
+            "time_out_am": attendances[i]['time_out_am'],
+            "time_in_pm": attendances[i]['time_in_pm'],
+            "time_out_pm": attendances[i]['time_out_pm'],
           };
 
-          // Check if the record has a valid time_out value
-          if (attendances[i]['time_out'] == 'not set') {
+          // Check if the record has a valid time_out_am value
+          if (attendances[i]['time_out_pm'] == 'not set') {
             print('Invalid record: ${attendances[i]}');
           } else {
             try {

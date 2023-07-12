@@ -110,8 +110,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
 
           // Check if employee was already recorded
           DateTime currentDate = DateTime.now();
-          // String formattedDate = DateFormat('MM/dd/yyyy').format(currentDate);
-          // String formattedTime = DateFormat('hh:mm a').format(currentDate);
+     
           bool recordExists =
               await db_provider.isAttendanceRecordExists(data['employee']);
           if (recordExists) {
