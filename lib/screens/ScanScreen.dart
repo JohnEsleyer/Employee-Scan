@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../navbar.dart';
+import '../widgets/navbar.dart';
 
 import '../providers/DBProvider.dart';
 

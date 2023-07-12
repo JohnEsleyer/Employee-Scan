@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:employee_scan/navbar.dart';
+import 'package:employee_scan/widgets/navbar.dart';
 import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
 import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/widgets/CountdownTimerSync.dart';

@@ -1,19 +1,13 @@
-import 'package:intl/intl.dart';
+import 'package:bcrypt/bcrypt.dart';
 
-String convertToFormattedDateTime(String dateTimeString) {
-  // Parse the input string to a DateTime object
-  DateTime dateTime = DateTime.parse(dateTimeString);
-
-  // Create a DateFormat object with the desired format
-  DateFormat dateFormat = DateFormat('yyyy-MM-dd hh:mm a');
-
-  // Format the DateTime object using the DateFormat
-  String formattedDateTime = dateFormat.format(dateTime);
-
-  return formattedDateTime;
-}
 
 void main(){
-  var timeNow = DateTime.now();
-  print(convertToFormattedDateTime(timeNow.toString()));
+  String storedHashedPassword = r'$2y$10$qjTaoZOOgrZWUx0W2CsbSugYHJYzSyeseEvGvJsEzgHVN0mVupv6G';
+  String password = 'password123';
+
+  
+  // Check password
+  final bool checkPassword = BCrypt.checkpw(password, storedHashedPassword);
+
+  print(checkPassword);
 }

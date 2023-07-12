@@ -13,6 +13,7 @@ import 'screens/HomePage.dart';
 
 import 'providers/InternetProvider.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -27,6 +28,7 @@ void main() async {
         'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, department INTEGER);');
     db.execute(
         'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, office_id INTEGER, time_in TEXT, time_out TEXT, sync INTEGER);');
+    db.execute('CREATE TABLE user (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password TEXT);');
   });
 
   
@@ -285,6 +287,7 @@ class EmployeeScan extends StatefulWidget {
 class _EmployeeScanState extends State<EmployeeScan> {
   late DatabaseProvider db_provider;
   String token = '';
+
 
   Future<List<dynamic>> fetchEmployeeList() async {
     Map<String, String> headers = {

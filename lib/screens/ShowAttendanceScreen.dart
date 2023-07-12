@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +30,7 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
     db_provider = Provider.of<DatabaseProvider>(context);
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0.0,
         backgroundColor: Colors.white,
         title: Text(
