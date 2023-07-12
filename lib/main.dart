@@ -50,7 +50,7 @@ void main() async {
         debugShowCheckedModeBanner: false,
         routes: {
           '/': (_) => const Login(),
-          '/home': (_) => EmployeeScan(),
+          '/home': (_) => HomePage(),
           '/settings': (_) => SettingsScreen(),
         },
       ),
@@ -334,7 +334,9 @@ class _EmployeeScanState extends State<EmployeeScan> {
               }
             }
 
-            return HomePage();
+            Navigator.of(context).popAndPushNamed('/home');
+
+            return Container();
           } else {
             return Scaffold(
               body: Center(

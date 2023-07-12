@@ -1,8 +1,5 @@
-import 'dart:async';
 
-import 'dart:isolate';
 
-import 'package:connectivity/connectivity.dart';
 import 'package:employee_scan/widgets/navbar.dart';
 import 'package:employee_scan/screens/ShowAttendanceScreen.dart';
 import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
@@ -23,54 +20,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late InternetProvider internetProvider;
-  late ReceivePort receivePort;
-  late Isolate? isolate;
+
   late DatabaseProvider db_provider;
   String debug = '';
   int _selectedIndex = 1;
-
-  @override
-  void initState() {
-    super.initState();
-
-    startBackgroundTask();
-  }
-
-  @override
-  void dispose() {
-    stopBackgroundTask();
-    super.dispose();
-  }
-
-  Future<void> startBackgroundTask() async {
-    receivePort = ReceivePort();
-
-    isolate =
-        await Isolate.spawn(checkConnectivityInIsolate, receivePort.sendPort);
-    receivePort.listen((dynamic message) {
-      if (message is bool) {
-        internetProvider.setIsConnected(message);
-      }
-    });
-  }
-
-  void stopBackgroundTask() {
-    isolate?.kill(priority: Isolate.immediate);
-    isolate = null;
-    receivePort.close();
-  }
-
-  static void checkConnectivityInIsolate(SendPort sendPort) async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    final isConnected = connectivityResult != ConnectivityResult.none;
-    sendPort.send(isConnected);
-
-    // Continuously listen for connectivity changes in the isolate
-    await for (var result in Connectivity().onConnectivityChanged) {
-      final isConnected = result != ConnectivityResult.none;
-      sendPort.send(isConnected);
-    }
-  }
 
   final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
     BottomNavigationBarItem(

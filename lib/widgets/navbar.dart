@@ -70,7 +70,7 @@ class _NavbarState extends State<Navbar> {
             onTap: () {
               // Clear current user data
               userDataProvider.clearData();
-              Navigator.of(context).popAndPushNamed('/settings');
+              Navigator.of(context).pushNamed('/settings');
             },
           ),
         ],

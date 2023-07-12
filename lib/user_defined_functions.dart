@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 
 // Constants
-const API_URL = 'http://ojt.infoactiv.org/api';
+const API_URL = 'https://ojt.infoactiv.org/api';
 
 // Identify is string is JSON
 bool isJSON(String? string) {
