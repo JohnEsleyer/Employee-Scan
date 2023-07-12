@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/HomePage.dart';
 
@@ -32,7 +33,6 @@ void main() async {
     db.execute('CREATE TABLE user (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password TEXT);');
   });
 
-  
   runApp(
     MultiProvider(
       providers: [

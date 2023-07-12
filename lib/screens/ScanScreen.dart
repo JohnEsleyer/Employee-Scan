@@ -401,12 +401,12 @@ class _QRViewScreenState extends State<QRViewScreen> {
                                                     // fontWeight: FontWeight.bold
                                                   )),
                                               SizedBox(height: 10),
-                                              Text(temp,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    // fontWeight: FontWeight.bold
-                                                  )),
+                                              // Text(temp,
+                                              //     textAlign: TextAlign.center,
+                                              //     style: TextStyle(
+                                              //       fontSize: 15,
+                                              //       // fontWeight: FontWeight.bold
+                                              //     )),
                                             ],
                                           )),
                                     ),

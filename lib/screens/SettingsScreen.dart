@@ -19,8 +19,8 @@ class _SettingsScreenState extends State<SettingsScreen>{
               title: Text('Offline Log in'),
               leading: Icon(Icons.key),
               trailing: ToggleSwitch(
-                labels: ['On, Off'],
-                activeBgColor: [Colors.green, Colors.red],
+                labels: const ['On', 'Off'],
+                activeBgColor: const [Colors.green, Colors.red],
                 onToggle: (index){
                   
                 },
