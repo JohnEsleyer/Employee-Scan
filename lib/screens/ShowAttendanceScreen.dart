@@ -149,7 +149,7 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                               Row(
                                                 children: [
                                                   Text(
-                                                    "Time In: ",
+                                                    "Time In (AM): ",
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -157,20 +157,47 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                   ),
                                                   
                                                   Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_in'])),
+                                                      'time_in_am'])),
                                                 ],
                                               ),
                                               Row(
                                                 children: [
                                                   Text(
-                                                    "Time Out: ",
+                                                    "Time Out (AM): ",
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
                                                   ),
                                                   Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_out'])),
+                                                      'time_out_am'])),
+                                                ],
+                                              ),
+                                                Row(
+                                                children: [
+                                                  Text(
+                                                    "Time In (PM): ",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  
+                                                  Text(convertToFormattedDateTime(attendanceRecord[
+                                                      'time_in_pm'])),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "Time Out (PM): ",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(convertToFormattedDateTime(attendanceRecord[
+                                                      'time_out_pm'])),
                                                 ],
                                               )
                                             ]),
