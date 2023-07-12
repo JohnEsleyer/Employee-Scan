@@ -42,11 +42,11 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              print("Pressed Clear All");
+              
               setState(() {
                 isPressed = true;
               });
-              db_provider.clearAllAttendance();
+              db_provider.clearAllSyncAttendance();
               setState(() {
                 isPressed = false;
               });

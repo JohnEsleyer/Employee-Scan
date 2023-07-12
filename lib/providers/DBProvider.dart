@@ -37,6 +37,11 @@ class DatabaseProvider extends ChangeNotifier {
     await db.delete('attendance');
   }
 
+  Future<void> clearAllSyncAttendance() async {
+    await db.delete('attendance', where: 'sync = ?', whereArgs: [1]);
+  }
+
+
   Future<void> updateTimeOutAM(int employee_id, String newTimeOut) async {
     final whereArgs = [employee_id];
     final updates = {'time_out_am': newTimeOut};
