@@ -94,7 +94,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
         setState(() {
           temp = "Is JSON";
         });
-        // Check if qr code belongs to the company
 
         // Check employee existence
         bool employeeExists =
@@ -109,6 +108,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
 
           bool recordExists =
               await db_provider.isAttendanceRecordExists(data['employee']);
+          print('EXIST: $recordExists');
           if (recordExists) {
             Map<String, dynamic> attendanceRecord =
                 await db_provider.getAttendanceByEmployeeId(data['employee']);
@@ -116,7 +116,6 @@ class _QRViewScreenState extends State<QRViewScreen> {
               // Process the retrieved attendance record
 
               String timeOutAM = attendanceRecord['time_out_am'];
-
 
               if (timeOutAM == 'not set') {
                 temp = 'not set';
@@ -134,7 +133,7 @@ class _QRViewScreenState extends State<QRViewScreen> {
               } else {
                 String timeInPM = attendanceRecord['time_in_pm'];
 
-                if (timeInPM == 'not set'){
+                if (timeInPM == 'not set') {
                   temp = 'not set';
                   // Update timeOut
                   await db_provider.updateTimeInPM(
@@ -147,11 +146,11 @@ class _QRViewScreenState extends State<QRViewScreen> {
                     first_name = employee?['first_name'];
                     last_name = employee?['last_name'];
                   });
-                }else{
+                } else {
                   String timeOutPM = attendanceRecord['time_out_pm'];
 
-                  if (timeOutPM == 'not set'){
-                     temp = 'not set';
+                  if (timeOutPM == 'not set') {
+                    temp = 'not set';
                     // Update timeOut
                     await db_provider.updateTimeOutPM(
                         data['employee'], currentDate.toString());
@@ -163,9 +162,9 @@ class _QRViewScreenState extends State<QRViewScreen> {
                       first_name = employee?['first_name'];
                       last_name = employee?['last_name'];
                     });
-                  }else{
+                  } else {
                     Map<String, dynamic>? employee =
-                    await db_provider.getEmployeeById(data['employee']);
+                        await db_provider.getEmployeeById(data['employee']);
                     setState(() {
                       id = data['employee'];
                       first_name = employee?['first_name'];
@@ -173,12 +172,8 @@ class _QRViewScreenState extends State<QRViewScreen> {
                       temp = 'Attendance was already set for today';
                       borderColor = Colors.amber;
                     });
-
                   }
-
                 }
-                
-                
               }
             } else {
               temp = 'No attendance record found ';

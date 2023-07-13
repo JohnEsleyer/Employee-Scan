@@ -17,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late bool _offline_login;
   late bool _auto_sync;
   late int _seconds;
+  bool _syncLoading = false;
   late SharedPreferences _prefs;
 
   late DatabaseProvider db_provider;
@@ -172,12 +173,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: Text('Sync Attendance and Employee'),
                 subtitle: Text(
                     'This will only send records that have set all time ins and time outs. The employee records stored in this device will be updated.'),
-                trailing: ElevatedButton(
-                  child: Text('Send'),
-                  onPressed: () {
-                    db_provider.sync();
-                  },
-                ),
+                trailing: !_syncLoading
+                    ? ElevatedButton(
+                        child: Text('Send'),
+                        onPressed: () async {
+                          setState(() {
+                            _syncLoading = true;
+                          });
+                          await db_provider.sync();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Sync Successful'),
+                              showCloseIcon: false,
+                            ),
+                          );
+                          setState(() {
+                            _syncLoading = false;
+                          });
+                        },
+                      )
+                    : CircularProgressIndicator(),
               ),
             ],
           ),

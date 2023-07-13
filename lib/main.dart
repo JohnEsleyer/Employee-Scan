@@ -37,7 +37,7 @@ void main() async {
       db.execute(
           'CREATE TABLE employee (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, department INTEGER);');
       db.execute(
-          'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, office_id INTEGER, time_in TEXT, time_out TEXT, sync INTEGER);');
+          'CREATE TABLE attendance (id INTEGER PRIMARY KEY, employee_id INTEGER, office_id INTEGER, time_in_am TEXT, time_out_am TEXT, time_in_pm TEXT, time_out_pm TEXT, sync INTEGER);');
       db.execute(
           'CREATE TABLE user (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password TEXT);');
 

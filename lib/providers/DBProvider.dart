@@ -225,6 +225,7 @@ class DatabaseProvider extends ChangeNotifier {
         // Check if the record is not yet synced
         if (attendances[i]['sync'] == 0) {
           final url = API_URL + '/attendance';
+
           final requestBody = {
             "employee_id": attendances[i]['employee_id'],
             "office_id": attendances[i]['office_id'],
