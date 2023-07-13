@@ -1,3 +1,4 @@
+import 'package:bcrypt/bcrypt.dart';
 import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -148,6 +149,22 @@ class DatabaseProvider extends ChangeNotifier {
       'last_name': last_name,
       'department': department,
     });
+  }
+
+  Future<bool> loginUser(String username, String password) async {
+    final List<Map<String, dynamic>> users = await getAllUsers();
+
+    for (var user in users) {
+      if (user['username'] == username) {
+        // Check password
+        final bool checkPassword = BCrypt.checkpw(password, user['password']);
+        if (checkPassword) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
