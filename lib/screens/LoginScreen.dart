@@ -414,8 +414,8 @@ class _LoginScreenOfflineState extends State<LoginScreenOffline> {
                                     isWaiting = true;
                                   });
                                   bool result = await db_provider.loginUser(
-                                      _usernameController as String,
-                                      _passwordController as String);
+                                      _usernameController.text,
+                                      _passwordController.text);
 
                                   setState(() {
                                     isWaiting = false;

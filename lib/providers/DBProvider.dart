@@ -1,8 +1,6 @@
 import 'package:bcrypt/bcrypt.dart';
-import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
