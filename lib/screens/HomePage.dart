@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   late InternetProvider internetProvider;
   late SharedPreferences _prefs;
   late int _seconds;
+  late bool _auto_sync;
 
   late DatabaseProvider db_provider;
   String debug = '';
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
+    _auto_sync = _prefs.getBool('auto_sync') ?? true;
     int option = _prefs.getInt('seconds') ?? 0;
 
     if (option == 0) {
@@ -105,30 +107,32 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         actions: [
-          internetProvider.isConnected
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 15, top: 15),
-                  child: CountdownTimerSync(
-                    duration: _seconds,
-                    onFinished: () {
-                      db_provider.sync();
-                    },
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi, color: Colors.red),
-                      Text(
-                        'Disconnected',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
+          _auto_sync
+              ? internetProvider.isConnected
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 15, top: 15),
+                      child: CountdownTimerSync(
+                        duration: _seconds,
+                        onFinished: () {
+                          db_provider.sync();
+                        },
                       ),
-                    ],
-                  ),
-                )
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Icon(Icons.wifi, color: Colors.red),
+                          Text(
+                            'Disconnected',
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+              : Container(),
         ],
         backgroundColor: Colors.white,
       ),

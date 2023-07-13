@@ -1,4 +1,3 @@
-import 'package:employee_scan/providers/UserDataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:http/http.dart' as http;
