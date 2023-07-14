@@ -212,6 +212,10 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> sync() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+    _prefs.setBool('syncing', true);
+
     try {
       // Retrieve all attendance records
       List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
@@ -314,5 +318,7 @@ class DatabaseProvider extends ChangeNotifier {
     } catch (error) {
       print('Error: $error');
     }
+
+    _prefs.setBool('syncing', false);
   }
 }

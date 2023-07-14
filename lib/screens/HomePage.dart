@@ -113,8 +113,14 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.only(right: 15, top: 15),
                       child: CountdownTimerSync(
                         duration: _seconds,
-                        onFinished: () {
-                          db_provider.sync();
+                        onFinished: () async {
+                          SharedPreferences _prefs =
+                              await SharedPreferences.getInstance();
+
+                          bool is_syncing = _prefs.getBool('syncing') ?? false;
+                          if (!is_syncing) {
+                            db_provider.sync();
+                          }
                         },
                       ),
                     )
