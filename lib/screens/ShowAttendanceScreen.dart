@@ -1,4 +1,3 @@
-
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -42,7 +41,6 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              
               setState(() {
                 isPressed = true;
               });
@@ -54,12 +52,25 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
             },
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.only(
-                  right: 20,
-                ),
-                child: Text(
-                  "Clear All",
-                  style: TextStyle(color: Colors.black),
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      right: 10,
+                      left: 10,
+                    ),
+                    child: Text(
+                      "Clear All \n Synced Records",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -155,9 +166,10 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  
-                                                  Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_in_am'])),
+                                                  Text(
+                                                      convertToFormattedDateTime(
+                                                          attendanceRecord[
+                                                              'time_in_am'])),
                                                 ],
                                               ),
                                               Row(
@@ -169,11 +181,13 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_out_am'])),
+                                                  Text(
+                                                      convertToFormattedDateTime(
+                                                          attendanceRecord[
+                                                              'time_out_am'])),
                                                 ],
                                               ),
-                                                Row(
+                                              Row(
                                                 children: [
                                                   Text(
                                                     "Time In (PM): ",
@@ -182,9 +196,10 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  
-                                                  Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_in_pm'])),
+                                                  Text(
+                                                      convertToFormattedDateTime(
+                                                          attendanceRecord[
+                                                              'time_in_pm'])),
                                                 ],
                                               ),
                                               Row(
@@ -196,8 +211,10 @@ class _ShowAttendanceScreenState extends State<ShowAttendanceScreen> {
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  Text(convertToFormattedDateTime(attendanceRecord[
-                                                      'time_out_pm'])),
+                                                  Text(
+                                                      convertToFormattedDateTime(
+                                                          attendanceRecord[
+                                                              'time_out_pm'])),
                                                 ],
                                               )
                                             ]),

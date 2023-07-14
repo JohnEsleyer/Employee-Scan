@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:employee_scan/providers/DBProvider.dart';
+import 'package:employee_scan/screens/ShowEmployeeScreen.dart.dart';
 import 'package:employee_scan/user_defined_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -193,6 +194,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       )
                     : CircularProgressIndicator(),
+              ),
+              ListTile(
+                title: Text('Show All Employee Data'),
+                subtitle: Text('Show all employee data stored in this device.'),
+                trailing: ElevatedButton(
+                    child: Text('Show'),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ShowEmployeeScreen(),
+                      ));
+                    }),
               ),
             ],
           ),

@@ -36,10 +36,6 @@ class _HomePageState extends State<HomePage> {
       icon: Icon(Icons.search),
       label: 'Scan',
     ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.people),
-      label: 'Employee',
-    ),
   ];
 
   void initState() {
@@ -152,8 +148,7 @@ class _HomePageState extends State<HomePage> {
         return ShowAttendanceScreen();
       case 1:
         return QRViewScreen();
-      case 2:
-        return ShowEmployeeScreen();
+
       default:
         return Container();
     }
