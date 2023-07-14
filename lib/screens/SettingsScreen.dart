@@ -15,13 +15,14 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late bool _offline_login;
-  late bool _auto_sync;
+  late bool _offlineLogin;
+  late bool _autoSync;
   late int _seconds;
   bool _syncLoading = false;
+  bool _clearLoading = false;
   late SharedPreferences _prefs;
 
-  late DatabaseProvider db_provider;
+  late DatabaseProvider dbProvider;
 
   @override
   void initState() {
@@ -32,8 +33,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      _offline_login = _prefs.getBool('offline_login') ?? false;
-      _auto_sync = _prefs.getBool('auto_sync') ?? true;
+      _offlineLogin = _prefs.getBool('offline_login') ?? false;
+      _autoSync = _prefs.getBool('auto_sync') ?? true;
       _seconds = _prefs.getInt('seconds') ?? 0;
       // Initialize other settings here
       // ...
@@ -41,8 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _saveSettings() async {
-    await _prefs.setBool('offline_login', _offline_login);
-    await _prefs.setBool('auto_sync', _auto_sync);
+    await _prefs.setBool('offline_login', _offlineLogin);
+    await _prefs.setBool('auto_sync', _autoSync);
     await _prefs.setInt('seconds', _seconds);
     // put all future settings here
     // ...
@@ -65,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       for (int i = 0; i < data.length; i++) {
         try {
           // Insert data into the database
-          db_provider.insertUser(data[i]['id'], data[i]['first_name'],
+          dbProvider.insertUser(data[i]['id'], data[i]['first_name'],
               data[i]['last_name'], data[i]['username'], data[i]['password']);
         } catch (error) {
           print('Error: Error at inserting user ($error)');
@@ -78,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    db_provider = Provider.of<DatabaseProvider>(context);
+    dbProvider = Provider.of<DatabaseProvider>(context);
 
     List<String> durations = [
       '30',
@@ -92,18 +93,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: ListView(
             children: [
               SwitchListTile(
-                title: Text("Offline Login"),
-                value: _offline_login,
+                title: const Text("Offline Login"),
+                value: _offlineLogin,
                 onChanged: (value) async {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   setState(() {
-                    _offline_login = value;
+                    _offlineLogin = value;
                   });
                   _saveSettings();
 
                   if (value == true) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content:
                             Text('Downloading all users from the server...'),
                         showCloseIcon: false,
@@ -111,8 +112,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
 
                     await fetchUsers();
+                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content:
                             Text('All users\' data downloaded successfully.'),
                         showCloseIcon: false,
@@ -120,28 +122,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   }
                 },
-                subtitle: Text(
+                subtitle: const Text(
                     'When enabled, the app will automatically download all the users\' data from the server for offline use'),
               ),
               SwitchListTile(
-                title: Text("Auto-sync"),
-                value: _auto_sync,
+                title: const Text("Auto-sync"),
+                value: _autoSync,
                 onChanged: (value) async {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   setState(() {
-                    _auto_sync = value;
+                    _autoSync = value;
                   });
                   _saveSettings();
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text(
                           'This toggle requires restarting the app to take effect.'),
                       showCloseIcon: false,
                     ),
                   );
                 },
-                subtitle: Text(
+                subtitle: const Text(
                     'Attendance stored locally will be sent to the server every 30/60/300 seconds. This will also sync all employee data.'),
               ),
               Center(
@@ -171,8 +173,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               ListTile(
-                title: Text('Sync Attendance and Employee'),
-                subtitle: Text(
+                title: const Text('Sync Attendance and Employee'),
+                subtitle: const Text(
                     'This will only send records that have set all time ins and time outs. The employee records stored in this device will be updated.'),
                 trailing: !_syncLoading
                     ? ElevatedButton(
@@ -181,9 +183,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() {
                             _syncLoading = true;
                           });
-                          await db_provider.sync();
+                          await dbProvider.sync();
+                          // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text('Sync Successful'),
                               showCloseIcon: false,
                             ),
@@ -193,18 +196,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                         },
                       )
-                    : CircularProgressIndicator(),
+                    : const CircularProgressIndicator(),
               ),
               ListTile(
-                title: Text('Show All Employee Data'),
-                subtitle: Text('Show all employee data stored in this device.'),
+                title: const Text('Show All Employee Data'),
+                subtitle:
+                    const Text('Show all employee data stored in this device.'),
                 trailing: ElevatedButton(
-                    child: Text('Show'),
+                    child: const Text('Show'),
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => ShowEmployeeScreen(),
                       ));
                     }),
+              ),
+              ListTile(
+                title: const Text('Force Clear Attendance Records'),
+                subtitle: const Text(
+                    'This will clear all attendance records including the unsync ones.'),
+                trailing: !_clearLoading
+                    ? ElevatedButton(
+                        style: const ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(Colors.red),
+                        ),
+                        child: const Text('Clear'),
+                        onPressed: () async {
+                          setState(() {
+                            _clearLoading = true;
+                          });
+
+                          dbProvider.clearAllAttendance();
+
+                          await Future.delayed(Duration(seconds: 1), () {});
+
+                          setState(() {
+                            _clearLoading = false;
+                          });
+                        })
+                    : const CircularProgressIndicator(),
               ),
             ],
           ),
