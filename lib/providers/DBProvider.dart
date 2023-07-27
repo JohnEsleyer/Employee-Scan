@@ -213,111 +213,116 @@ class DatabaseProvider extends ChangeNotifier {
   Future<void> sync() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
 
-    _prefs.setBool('syncing', true);
+    if (_prefs.getBool('syncing') != true){
+        _prefs.setBool('syncing', true);
 
-    try {
-      // Retrieve all attendance records
-      List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
-      print('Total attendance records: ${attendances.length}');
+      try {
+        // Retrieve all attendance records
+        List<Map<String, dynamic>> attendances = await getAllAttendanceRecords();
+        print('Total attendance records: ${attendances.length}');
 
-      // Counter to track synced records
-      int counter = 0;
+        // Counter to track synced records
+        int counter = 0;
 
-      // Iterate through each attendance record
-      for (int i = 0; i < attendances.length; i++) {
-        // Check if the record is not yet synced
-        if (attendances[i]['sync'] == 0) {
-          final url = API_URL + '/attendance';
+        // Iterate through each attendance record
+        for (int i = 0; i < attendances.length; i++) {
+          // Check if the record is not yet synced
+          if (attendances[i]['sync'] == 0) {
+            final url = API_URL + '/attendance';
 
-          final requestBody = {
-            "employee_id": attendances[i]['employee_id'],
-            "office_id": attendances[i]['office_id'],
-            "time_in_am": attendances[i]['time_in_am'],
-            "time_out_am": attendances[i]['time_out_am'],
-            "time_in_pm": attendances[i]['time_in_pm'],
-            "time_out_pm": attendances[i]['time_out_pm'],
-          };
+            final requestBody = {
+              "user_id": attendances[i]['employee_id'],
+              "office_id": attendances[i]['office_id'],
+              "time_in_am": attendances[i]['time_in_am'],
+              "time_out_am": attendances[i]['time_out_am'],
+              "time_in_pm": attendances[i]['time_in_pm'],
+              "time_out_pm": attendances[i]['time_out_pm'],
+            };
 
-          // Check if the record has a valid time_out_am value
-          if (attendances[i]['time_out_pm'] == 'not set') {
-            print('Invalid record: ${attendances[i]}');
-          } else {
-            try {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              String token = prefs.getString('token') ?? '';
+            // Check if the record has a valid time_out_am value
+            if (attendances[i]['time_out_pm'] == 'not set') {
+              print('Invalid record: ${attendances[i]}');
+            } else {
+              try {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String token = prefs.getString('token') ?? '';
 
-              Map<String, String> headers = {
-                "Authorization": "Bearer $token",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-              };
-              // Send a POST request to the API
-              final response = await http.post(
-                Uri.parse(url),
-                body: json.encode(requestBody),
-                headers: headers,
-              );
+                Map<String, String> headers = {
+                  "Authorization": "Bearer $token",
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                };
+                // Send a POST request to the API
+                final response = await http.post(
+                  Uri.parse(url),
+                  body: json.encode(requestBody),
+                  headers: headers,
+                );
 
-              if (response.statusCode == 200) {
-                // Request successful
-                final responseBody = json.decode(response.body);
-                print('Response body: $responseBody');
+                if (response.statusCode == 200) {
+                  // Request successful
+                  final responseBody = json.decode(response.body);
+                  print('Response body: $responseBody');
 
-                // Update the record's sync status
-                await updateSync(attendances[i]['employee_id'], 1);
-              } else {
-                // Request failed
-                print('Request failed');
+                  // Update the record's sync status
+                  await updateSync(attendances[i]['employee_id'], 1);
+                } else {
+                  // Request failed
+                  print('Request failed: ${response.statusCode}');
+                  print(requestBody);
+                }
+              } catch (error) {
+                print('Error: $error');
               }
-            } catch (error) {
-              print('Error: $error');
+              counter++;
             }
-            counter++;
           }
         }
-      }
-      print('Total records synced: $counter');
+        print('Total records synced: $counter');
 
-      // Sync Employee
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+        // Sync Employee
+        SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      String token = prefs.getString('token') ?? '';
-      Map<String, String> headers = {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      };
+        String token = prefs.getString('token') ?? '';
+        Map<String, String> headers = {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        };
 
-      final response = await http.get(
-        Uri.parse(API_URL + '/users'),
-        headers: headers,
-      );
+        final response = await http.get(
+          Uri.parse(API_URL + '/users'),
+          headers: headers,
+        );
 
-      if (response.statusCode == 200) {
-        print("200");
-        // The request was successful, parse the JSON
-        var data = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          print("200");
+          // The request was successful, parse the JSON
+          var data = jsonDecode(response.body);
 
-        for (int i = 0; i < data!.length; i++) {
-          try {
-            // Insert data into the database
-            insertEmployee(data[i]['id'], data[i]['first_name'],
-                data[i]['last_name'], data[i]['department_id']);
-          } catch (error) {
-            print('Error: Error at inserting employee ($error)');
+          for (int i = 0; i < data!.length; i++) {
+            try {
+              // Insert data into the database
+              insertEmployee(data[i]['id'], data[i]['first_name'],
+                  data[i]['last_name'], data[i]['department_id']);
+            } catch (error) {
+              print('Error: Error at inserting employee ($error)');
+            }
           }
+        } else {
+          print("Error");
+          // The request failed, throw an error
+          throw Exception('Something went wrong');
         }
-      } else {
-        print("Error");
-        // The request failed, throw an error
-        throw Exception('Something went wrong');
+
+        //
+      } catch (error) {
+        print('Error: $error');
       }
 
-      //
-    } catch (error) {
-      print('Error: $error');
+      _prefs.setBool('syncing', false);
+    }
     }
 
-    _prefs.setBool('syncing', false);
-  }
+   
 }
