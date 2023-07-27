@@ -166,7 +166,6 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> getAllEmployeeRecords() async {
-    print('Executed getAllEmployeeRecords');
     final results = await db.query('employee');
 
     List<Map<String, dynamic>> employeeRecords = [];
@@ -290,7 +289,7 @@ class DatabaseProvider extends ChangeNotifier {
       };
 
       final response = await http.get(
-        Uri.parse(API_URL + '/employee'),
+        Uri.parse(API_URL + '/users'),
         headers: headers,
       );
 
